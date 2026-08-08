@@ -1275,7 +1275,7 @@ async toggleProductStatus(name, currentStatus) {
             
             Swal.fire('Berhasil', `Status ${name} diubah ke ${newStatus}`, 'success');
         } else {
-            throw new Error("Gagal update ke server");
+            throw new Error(result.error || "Gagal update status");
         }
     } catch (e) {
         Swal.fire('Error', e.message, 'error');
@@ -1283,6 +1283,7 @@ async toggleProductStatus(name, currentStatus) {
         this.loading = false;
     }
 },
+
 
 
                 // --- 6. HELPERS ---
