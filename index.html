@@ -605,65 +605,80 @@
         
         <!-- 1. TABEL KONTROL USER (Yang sudah Anda punya) -->
         <div class="stat-card p-6 overflow-x-auto">
-            <h2 class="text-xl font-black italic mb-6 accent-red">KONTROL USER</h2>
-            <table class="w-full text-left text-xs uppercase font-bold">
-                <thead class="text-gray-500 border-b border-white/5">
-                    <tr>
-                        <th class="p-4">User</th>
-                        <th class="p-4">Saldo</th>
-                        <th class="p-4">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/5">
-                    <template x-for="u in allUsers" :key="u.id">
-                        <tr class="hover:bg-white/5">
-                            <td class="p-4" x-text="u.email"></td>
-                            <td class="p-4 accent-red font-black" x-text="'Rp ' + (u.balance || 0).toLocaleString()"></td>
-                            <td class="p-4 flex gap-2">
-                                <button @click="updateBalance(u.id, 10000)" class="bg-green-600/20 text-green-500 px-2 py-1 rounded">+10K</button>
-                                <button @click="resetBalance(u.id)" class="bg-red-600/20 text-red-500 px-2 py-1 rounded">RESET</button>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
+    <h2 class="text-xl font-black italic mb-6 accent-red">KONTROL USER</h2>
+    
+    <!-- Bar Pencarian Email User -->
+    <div class="mb-4">
+        <input type="text" x-model="searchEmail" placeholder="Cari email user..." 
+               class="w-full md:w-1/3 px-3 py-2 bg-black/40 text-white rounded border border-white/10 text-xs uppercase focus:outline-none focus:border-red-500">
+    </div>
+
+    <table class="w-full text-left text-xs uppercase font-bold">
+        <thead class="text-gray-500 border-b border-white/5">
+            <tr>
+                <th class="p-4">User</th>
+                <th class="p-4">Saldo</th>
+                <th class="p-4">Aksi</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+            <!-- Filter otomatis berdasarkan input searchEmail -->
+            <template x-for="u in allUsers.filter(user => user.email.toLowerCase().includes((searchEmail || '').toLowerCase()))" :key="u.id">
+                <tr class="hover:bg-white/5">
+                    <td class="p-4" x-text="u.email"></td>
+                    <td class="p-4 accent-red font-black" x-text="'Rp ' + (u.balance || 0).toLocaleString()"></td>
+                    <td class="p-4 flex gap-2">
+                        <button @click="updateBalance(u.id, 10000)" class="bg-green-600/20 text-green-500 px-2 py-1 rounded">+10K</button>
+                        <button @click="updateBalance(u.id, 5000)" class="bg-green-600/20 text-green-500 px-2 py-1 rounded">+5K</button>
+                        <button @click="resetBalance(u.id)" class="bg-red-600/20 text-red-500 px-2 py-1 rounded">RESET</button>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>
+
 
         <!-- 2. TABEL KONTROL PRODUK (LETAKKAN KODE SELECT DI SINI) -->
-        <div class="stat-card p-6 overflow-x-auto">
-            <h2 class="text-xl font-black italic mb-6 accent-red">KONTROL STATUS PRODUK</h2>
-            <table class="w-full text-left text-xs uppercase font-bold">
-                <thead class="text-gray-500 border-b border-white/5">
-                    <tr>
-                        <th class="p-4">Nama Produk</th>
-                        <th class="p-4">Kategori</th>
-                        <th class="p-4">Status Saat Ini</th>
-                        <th class="p-4">Ubah Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/5">
-                    <template x-for="p in products" :key="p.name">
-                        <tr class="hover:bg-white/5">
-                            <td class="p-4 text-white" x-text="p.name"></td>
-                            <td class="p-4 text-gray-400" x-text="p.type"></td>
-                            <td class="p-4">
-                                <span :class="p.status === 'maintenance' ? 'text-red-500' : 'text-green-500'" 
-                                      x-text="p.status === 'maintenance' ? 'Maintenance' : 'Tersedia'">
-                                </span>
-                            </td>
-                            <!-- KODE SELECT YANG ANDA TANYAKAN DILETAKKAN DI SINI -->
-                            <td class="p-4">
-                                <select @change="updateProductStatus(p.name, $event.target.value)" 
-                                        class="bg-black text-white text-[10px] border border-white/10 p-2 rounded outline-none cursor-pointer">
-                                    <option value="available" :selected="p.status === 'available'">Tersedia</option>
-                                    <option value="maintenance" :selected="p.status === 'maintenance'">Maintenance</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
+       <div class="stat-card p-6 overflow-x-auto">
+    <h2 class="text-xl font-black italic mb-6 accent-red">KONTROL PRODUK</h2>
+    
+    <!-- Bar Pencarian Produk -->
+    <div class="mb-4">
+        <input type="text" x-model="searchProduct" placeholder="Cari nama produk..." 
+               class="w-full md:w-1/3 px-3 py-2 bg-black/40 text-white rounded border border-white/10 text-xs uppercase focus:outline-none focus:border-red-500">
+    </div>
+
+    <table class="w-full text-left text-xs uppercase font-bold">
+        <thead class="text-gray-500 border-b border-white/5">
+            <tr>
+                <th class="p-4">Nama Produk</th>
+                <th class="p-4">Harga</th>
+                <th class="p-4">Status</th>
+                <th class="p-4">Aksi</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+            <!-- Filter otomatis berdasarkan input searchProduct -->
+            <template x-for="p in products.filter(prod => prod.name.toLowerCase().includes((searchProduct || '').toLowerCase()))" :key="p.name">
+                <tr class="hover:bg-white/5">
+                    <td class="p-4" x-text="p.name"></td>
+                    <td class="p-4" x-text="'Rp ' + p.price.toLocaleString()"></td>
+                    <td class="p-4" x-text="p.status"></td>
+                    <td class="p-4">
+                        <!-- Tombol ubah status maintenance/tersedia yang sudah Anda miliki -->
+                        <button @click="toggleProductStatus(p.name, p.status)" 
+                                :class="p.status === 'maintenance' ? 'bg-yellow-600/20 text-yellow-500' : 'bg-blue-600/20 text-blue-500'" 
+                                class="px-2 py-1 rounded" 
+                                x-text="p.status === 'maintenance' ? 'Set Available' : 'Set Maintenance'">
+                        </button>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>
+
 
     </div>
 </template>
