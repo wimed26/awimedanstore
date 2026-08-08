@@ -666,11 +666,11 @@
                     <td class="p-4" x-text="'Rp ' + p.price.toLocaleString()"></td>
                     <td class="p-4" x-text="p.status"></td>
                     <td class="p-4">
-                        <!-- Tombol ubah status maintenance/tersedia yang sudah Anda miliki -->
-                        <button @click="toggleProductStatus(p.name, p.status)" 
-                                :class="p.status === 'maintenance' ? 'bg-yellow-600/20 text-yellow-500' : 'bg-blue-600/20 text-blue-500'" 
-                                class="px-2 py-1 rounded" 
-                                x-text="p.status === 'maintenance' ? 'Set Available' : 'Set Maintenance'">
+                    	<td class="p-4">
+    <button @click="toggleProductStatus(p.name, p.status)" 
+            :class="p.status === 'maintenance' ? 'bg-yellow-600/20 text-yellow-500' : 'bg-blue-600/20 text-blue-500'" 
+            class="px-3 py-1 rounded text-[10px] font-bold" 
+            x-text="p.status === 'maintenance' ? 'SET AVAILABLE' : 'SET MAINTENANCE'">
                         </button>
                     </td>
                 </tr>
@@ -1250,8 +1250,12 @@ if (!keyData || keyData.status !== 'active') {
             if(confirm("Reset saldo jadi 0?")) firebase.database().ref('users/' + uid + '/balance').set(0); 
         },
        
-       // Tambahkan fungsi ini di dalam script app()
-async updateProductStatus(name, newStatus) {
+       
+       
+       
+// Tambahkan atau ganti fungsi updateProductStatus yang ada menjadi ini:
+async toggleProductStatus(name, currentStatus) {
+    const newStatus = (currentStatus === 'maintenance') ? 'available' : 'maintenance';
     this.loading = true;
     try {
         const res = await fetch(this.WORKER_URL, { 
@@ -1265,18 +1269,21 @@ async updateProductStatus(name, newStatus) {
         
         const result = await res.json();
         if (result.status === "success") {
-            // Update array lokal agar tampilan langsung berubah tanpa refresh
+            // Update array lokal agar tabel langsung berubah
             const p = this.products.find(prod => prod.name === name);
             if (p) p.status = newStatus;
             
             Swal.fire('Berhasil', `Status ${name} diubah ke ${newStatus}`, 'success');
+        } else {
+            throw new Error("Gagal update ke server");
         }
     } catch (e) {
-        Swal.fire('Error', 'Gagal update status', 'error');
+        Swal.fire('Error', e.message, 'error');
     } finally {
         this.loading = false;
     }
 },
+
 
                 // --- 6. HELPERS ---
         syncInternalSession(t) {
@@ -1392,4 +1399,3 @@ async updateProductStatus(name, newStatus) {
 
 
 
-Seperti ini baru bisa, terus apa lagi yang di uab
