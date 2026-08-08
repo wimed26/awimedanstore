@@ -1214,6 +1214,34 @@ if (!keyData || keyData.status !== 'active') {
         resetBalance(uid) { 
             if(confirm("Reset saldo jadi 0?")) firebase.database().ref('users/' + uid + '/balance').set(0); 
         },
+       
+       // Tambahkan fungsi ini di dalam script app()
+async updateProductStatus(name, newStatus) {
+    this.loading = true;
+    try {
+        const res = await fetch(this.WORKER_URL, { 
+            method: 'POST', 
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                action: "update_product_status", 
+                data: { name: name, status: newStatus } 
+            }) 
+        });
+        
+        const result = await res.json();
+        if (result.status === "success") {
+            // Update array lokal agar tampilan langsung berubah tanpa refresh
+            const p = this.products.find(prod => prod.name === name);
+            if (p) p.status = newStatus;
+            
+            Swal.fire('Berhasil', `Status ${name} diubah ke ${newStatus}`, 'success');
+        }
+    } catch (e) {
+        Swal.fire('Error', 'Gagal update status', 'error');
+    } finally {
+        this.loading = false;
+    }
+},
 
                 // --- 6. HELPERS ---
         syncInternalSession(t) {
