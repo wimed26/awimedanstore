@@ -599,28 +599,9 @@
                 </div>
             </div>
         </div>
-        
-        
 
         <template x-if="isAdmin">
     <div x-show="currentPage === 'admin'" x-transition class="container mx-auto px-4 space-y-10 pb-20">
-    	
-        <!-- Tambahkan input pencarian ini di atas tabel -->
-    <input type="text" x-model="searchProduct" placeholder="Cari produk..." class="...">
-
-    <table>
-        <thead>...</thead>
-        <tbody>
-            <!-- UBAH BAGIAN INI DENGAN MENGGANTI LOOP-NYA -->
-            <template x-for="p in filteredAdminProducts" :key="p.name"> <!-- <--- LETAKKAN DISINI -->
-                <tr>
-                    <td x-text="p.name"></td>
-                    <!-- kolom lainnya -->
-                </tr>
-            </template>
-        </tbody>
-    </table>
-</div>
         
         <!-- 1. TABEL KONTROL USER (Yang sudah Anda punya) -->
         <div class="stat-card p-6 overflow-x-auto">
@@ -683,17 +664,9 @@
                 <tr class="hover:bg-white/5">
                     <td class="p-4" x-text="p.name"></td>
                     <td class="p-4" x-text="'Rp ' + p.price.toLocaleString()"></td>
-                                       <!-- UBAH BAGIAN INI DENGAN SELECT -->
-                    <td class="p-4">                                                                      
-                        <select x-model="p.status" @change="updateProductStatus(p.name, $event.target.value)"   
-                                class="bg-black/50 text-white border border-white/10 rounded px-2 py-1">   
-                            <option value="available">Available</option>                                 
-                            <option value="maintenance">Maintenance</option>                              
-                        </select>                                                                       
-                    </td>                                                                           
-                    
+                    <td class="p-4" x-text="p.status"></td>
                     <td class="p-4">
-                        <!-- Tombol bisa dipertahankan atau dihapus jika sudah menggunakan select -->
+                        <!-- Tombol ubah status maintenance/tersedia yang sudah Anda miliki -->
                         <button @click="toggleProductStatus(p.name, p.status)" 
                                 :class="p.status === 'maintenance' ? 'bg-yellow-600/20 text-yellow-500' : 'bg-blue-600/20 text-blue-500'" 
                                 class="px-2 py-1 rounded" 
@@ -705,6 +678,7 @@
         </tbody>
     </table>
 </div>
+
 
     </div>
 </template>
@@ -1418,3 +1392,4 @@ async updateProductStatus(name, newStatus) {
 
 
 
+Seperti ini baru bisa, terus apa lagi yang di uab
