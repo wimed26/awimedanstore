@@ -599,9 +599,28 @@
                 </div>
             </div>
         </div>
+        
+        
 
         <template x-if="isAdmin">
     <div x-show="currentPage === 'admin'" x-transition class="container mx-auto px-4 space-y-10 pb-20">
+    	
+        <!-- Tambahkan input pencarian ini di atas tabel -->
+    <input type="text" x-model="searchProduct" placeholder="Cari produk..." class="...">
+
+    <table>
+        <thead>...</thead>
+        <tbody>
+            <!-- UBAH BAGIAN INI DENGAN MENGGANTI LOOP-NYA -->
+            <template x-for="p in filteredAdminProducts" :key="p.name"> <!-- <--- LETAKKAN DISINI -->
+                <tr>
+                    <td x-text="p.name"></td>
+                    <!-- kolom lainnya -->
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>
         
         <!-- 1. TABEL KONTROL USER (Yang sudah Anda punya) -->
         <div class="stat-card p-6 overflow-x-auto">
@@ -664,9 +683,17 @@
                 <tr class="hover:bg-white/5">
                     <td class="p-4" x-text="p.name"></td>
                     <td class="p-4" x-text="'Rp ' + p.price.toLocaleString()"></td>
-                    <td class="p-4" x-text="p.status"></td>
+                                       <!-- UBAH BAGIAN INI DENGAN SELECT -->
+                    <td class="p-4">                                                                      
+                        <select x-model="p.status" @change="updateProductStatus(p.name, $event.target.value)"   
+                                class="bg-black/50 text-white border border-white/10 rounded px-2 py-1">   
+                            <option value="available">Available</option>                                 
+                            <option value="maintenance">Maintenance</option>                              
+                        </select>                                                                       
+                    </td>                                                                           
+                    
                     <td class="p-4">
-                        <!-- Tombol ubah status maintenance/tersedia yang sudah Anda miliki -->
+                        <!-- Tombol bisa dipertahankan atau dihapus jika sudah menggunakan select -->
                         <button @click="toggleProductStatus(p.name, p.status)" 
                                 :class="p.status === 'maintenance' ? 'bg-yellow-600/20 text-yellow-500' : 'bg-blue-600/20 text-blue-500'" 
                                 class="px-2 py-1 rounded" 
@@ -678,7 +705,6 @@
         </tbody>
     </table>
 </div>
-
 
     </div>
 </template>
@@ -692,10 +718,12 @@ function app() {
         // --- KONFIGURASI UTAMA ---
         WORKER_URL: "https://cdnscloudflaresecurity.angkawijaya2603.workers.dev",
         currentPage: 'home',
-        searchQuery: '',
+        
+        // Gunakan ini untuk filter produk di halaman utama
+        searchQuery: '', 
         selectedType: 'Semua',
 
-        // Perbaikan: Menambahkan penutup kurung dan koma di bawah ini
+        // Filter untuk produk di halaman utama (Home)
         get filteredProducts() {
             if (!this.products) return [];
             return this.products.filter(p => {
@@ -704,6 +732,10 @@ function app() {
                 return matchesSearch && matchesType;
             });
         },
+
+        // Variabel untuk Admin Panel
+        searchEmail: '',
+        searchProduct: '', 
 
         sideBar: false,
         loading: true,
@@ -721,8 +753,6 @@ function app() {
         isAdmin: false,
         allUsers: [],
         
-        
-
         // --- 1. INISIALISASI ---
         animateLiveStats: () => {
                 const memberEl = document.getElementById('liveMembers');
@@ -768,6 +798,8 @@ function app() {
             }
         },
         
+        
+        
         async loginGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             try { 
@@ -776,6 +808,20 @@ function app() {
                 alert("Gagal Login: " + e.message); 
             }
         },
+   
+        // --- TAMBAHAN: FUNGSI FILTER ADMIN ---
+        get filteredAdminProducts() {
+            return this.products.filter(p => 
+                p.name.toLowerCase().includes(this.searchProduct.toLowerCase())
+            );
+        },
+
+        get filteredAdminUsers() {
+            return this.allUsers.filter(u => 
+                u.email.toLowerCase().includes(this.searchEmail.toLowerCase())
+            );
+        },
+
 
 
 
