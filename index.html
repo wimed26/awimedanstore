@@ -699,13 +699,27 @@ function app() {
 
         // Filter untuk produk di halaman utama (Home)
         get filteredProducts() {
-            if (!this.products) return [];
-            return this.products.filter(p => {
-                const matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
-                const matchesType = (this.selectedType === 'Semua') || (p.type === this.selectedType);
-                return matchesSearch && matchesType;
-            });
-        },
+    if (!this.products) return [];
+    
+    // 1. Filter dulu
+    let result = this.products.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+        const matchesType = (this.selectedType === 'Semua') || (p.type === this.selectedType);
+        return matchesSearch && matchesType;
+    });
+
+    // 2. Sort: Available (atas) -> Maintenance (bawah)
+    result.sort((a, b) => {
+        const statusA = a.status || 'available';
+        const statusB = b.status || 'available';
+        if (statusA === 'available' && statusB !== 'available') return -1;
+        if (statusA !== 'available' && statusB === 'available') return 1;
+        return 0;
+    });
+
+    return result;
+},
+
 
         // Variabel untuk Admin Panel
         searchEmail: '',
@@ -742,35 +756,47 @@ function app() {
             },
         
         async init() {
-        this.animateLiveStats();
-            try {
-                const res = await fetch(this.WORKER_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: "get_init_data" }) 
-                });
-                const initData = await res.json();
-                this.products = initData.products;
-                this.firebaseConfig = initData.firebaseConfig;
+    this.animateLiveStats();
+    try {
+        const res = await fetch(this.WORKER_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: "get_init_data" }) 
+        });
+        const initData = await res.json();
+        
+        // Ambil produk dan langsung urutkan (Available di atas, Maintenance di bawah)
+        let loadedProducts = initData.products || [];
+        loadedProducts.sort((a, b) => {
+            const statusA = a.status || 'available';
+            const statusB = b.status || 'available';
+            if (statusA === 'available' && statusB !== 'available') return -1;
+            if (statusA !== 'available' && statusB === 'available') return 1;
+            return 0;
+        });
 
-                if (!firebase.apps.length) firebase.initializeApp(this.firebaseConfig);
-                
-                firebase.auth().onAuthStateChanged((u) => {
-                    this.user = u;
-                    if (u) {
-                        this.fetchUserData(u.uid);
-                        this.fetchUserHistory(u.uid);
-                        if (u.email === this.adminEmail) {
-                            this.isAdmin = true;
-                            this.fetchAllUsers();
-                        }
-                    }
-                });
-            } catch (e) { 
-                console.error("Koneksi Cloudflare Gagal:", e); 
-            } finally {
-                this.loading = false;
+        this.products = loadedProducts;
+        this.firebaseConfig = initData.firebaseConfig;
+
+        if (!firebase.apps.length) firebase.initializeApp(this.firebaseConfig);
+        
+        firebase.auth().onAuthStateChanged((u) => {
+            this.user = u;
+            if (u) {
+                this.fetchUserData(u.uid);
+                this.fetchUserHistory(u.uid);
+                if (u.email === this.adminEmail) {
+                    this.isAdmin = true;
+                    this.fetchAllUsers();
+                }
             }
-        },
+        });
+    } catch (e) { 
+        console.error("Koneksi Cloudflare Gagal:", e); 
+    } finally {
+        this.loading = false;
+    }
+},
+
         
         
         
