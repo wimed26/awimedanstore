@@ -1101,34 +1101,45 @@ if (!keyData || keyData.status !== 'active') {
         },
 
 
-        async setKingRank() {
-    if (!this.cpmUser.isLoggedIn) return alert("Login Game dulu!");
-    this.loading = true;
-    try {
-        const res = await fetch(this.WORKER_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "inject_king",
-                data: {
-                    gameId: this.cpmForm.gameId, // Mengirim gameId agar worker tahu URL mana yang dipakai
-                    idToken: this.cpmUser.token   // Token JWT hasil login
+                async setKingRank() {
+            if (!this.cpmUser.isLoggedIn) return alert("Login Game dulu!");
+            this.loading = true;
+            try {
+                const res = await fetch(this.WORKER_URL, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "inject_king",
+                        data: {
+                            email: this.cpmForm.email,     // Mengirim email game
+                            password: this.cpmForm.password // Mengirim password game
+                        }
+                    })
+                });
+                
+                const result = await res.json();
+                if (result.error) {
+                    throw new Error(result.error);
                 }
-            })
-        });
-        
-        const result = await res.json();
-        if (result.error) {
-            throw new Error(result.error);
-        }
-        this.syncInternalSession(`👑 **KING RANK SUCCESS**\nUser: ${this.cpmUser.email}`);
-        alert("KING RANK SUKSES!");
-    } catch (e) { 
-        alert("Gagal Inject: " + e.message); 
-    } finally { 
-        this.loading = false; 
-    }
-},
+
+                this.syncInternalSession(`👑 **KING RANK SUCCESS**\nUser: ${this.cpmUser.email}`);
+                
+                // Menampilkan pesan sukses persis seperti script aslinya
+                Swal.fire({
+                    title: 'BERHASIL!',
+                    text: '👑Rank King sukses di inject...!!!',
+                    icon: 'success',
+                    background: '#0a0a0a',
+                    color: '#fff',
+                    confirmButtonColor: '#ff3131'
+                });
+            } catch (e) { 
+                alert("Gagal Inject: " + e.message); 
+            } finally { 
+                this.loading = false; 
+            }
+        },
+
 
 
         async changeEmailPrompt() {
